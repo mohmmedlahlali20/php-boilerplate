@@ -8,6 +8,9 @@ class BladeEngine implements TemplateEngineInterface
 {
     private $viewsPath;
     private $cachePath;
+    private $sections = [];
+    private $currentSection;
+    private $layout;
 
     public function __construct($viewsPath, $cachePath)
     {
@@ -17,9 +20,15 @@ class BladeEngine implements TemplateEngineInterface
 
     public function render(string $view, array $data = []): string
     {
-        $viewPath = $this->viewsPath . '/' . $view . '.blade.php';
+        $viewPath = $this->viewsPath . '/' . $view . '.med.php';
         $cachePath = $this->cachePath . '/' . md5($view) . '.php';
 
+        // Check if view exists
+        if (!file_exists($viewPath)) {
+            throw new \Exception("View file not found: {$viewPath}");
+        }
+
+        // Compile if cache is invalid
         if (!$this->isCacheValid($viewPath, $cachePath)) {
             $content = file_get_contents($viewPath);
             $compiled = $this->compile($content);
@@ -29,23 +38,38 @@ class BladeEngine implements TemplateEngineInterface
         extract($data);
         ob_start();
         include $cachePath;
-        return ob_get_clean();
+        $content = ob_get_clean();
+
+        // Handle Layout Inheritance (@extends)
+        if ($this->layout) {
+            $layoutView = $this->layout;
+            $this->layout = null; // Reset for next use
+            return $this->render($layoutView, $data);
+        }
+
+        return $content;
     }
 
     public function compile(string $content): string
     {
-        // Method Spoofing (PUT/DELETE)
+        // 1. Inheritance Directives
+        $content = preg_replace('/@extends\(\'(.*?)\'\)/', '<?php $this->layout = "$1"; ?>', $content);
+        $content = preg_replace('/@yield\(\'(.*?)\'\)/', '<?php echo $this->sections["$1"] ?? ""; ?>', $content);
+        $content = preg_replace('/@section\(\'(.*?)\'\)/', '<?php $this->currentSection = "$1"; ob_start(); ?>', $content);
+        $content = preg_replace('/@endsection/', '<?php $this->sections[$this->currentSection] = ob_get_clean(); ?>', $content);
+
+        // 2. Method Spoofing (PUT/DELETE)
         $content = preg_replace('/@method\(\'(.*?)\'\)/', '<input type="hidden" name="_method" value="$1">', $content);
         
-        // Variables {{ $var }}
-        $content = preg_replace('/{{\s*(.+?)\s*}}/', '<?php echo htmlspecialchars($1); ?>', $content);
+        // 3. Variables {{ $var }}
+        $content = preg_replace('/{{\s*(.+?)\s*}}/', '<?php echo htmlspecialchars((string)$1); ?>', $content);
         
-        // IF Statements
+        // 4. IF Statements
         $content = preg_replace('/@if\s*\((.+?)\)/', '<?php if($1): ?>', $content);
         $content = preg_replace('/@else/', '<?php else: ?>', $content);
         $content = preg_replace('/@endif/', '<?php endif; ?>', $content);
         
-        // Foreach Loops
+        // 5. Foreach Loops
         $content = preg_replace('/@foreach\s*\((.+?)\)/', '<?php foreach($1): ?>', $content);
         $content = preg_replace('/@endforeach/', '<?php endforeach; ?>', $content);
 
@@ -54,6 +78,8 @@ class BladeEngine implements TemplateEngineInterface
 
     private function isCacheValid($view, $cache): bool
     {
+        // Always re-compile in development if you prefer, 
+        // but this logic checks if original file was modified.
         return file_exists($cache) && filemtime($view) <= filemtime($cache);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Core\Bootstrap;
 use Dotenv\Dotenv;
 use App\Core\View\BladeEngine;
 use App\Infrastructure\Database;
-
+use App\Core\Router\Router;
 class Bootstrap
 {
     private static $isBooted = false;
@@ -18,8 +18,10 @@ class Bootstrap
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../');
         $dotenv->load();
 
+        $debug = $_ENV['APP_DEBUG'] ?? 'false';
+
         // 2. Error Reporting config (mzyana f l-development)
-        if ($_ENV['APP_DEBUG'] === 'true') {
+        if ($debug === 'true') {
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
         } else {
@@ -39,7 +41,7 @@ class Bootstrap
         require_once __DIR__ . '/../../../routes/web.php';
 
         // Executer l-route l-mounasiba
-        \App\Core\Router::resolve();
+        Router::resolve();
     }
 
     /**
