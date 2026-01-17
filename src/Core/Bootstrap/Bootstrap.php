@@ -6,21 +6,25 @@ use Dotenv\Dotenv;
 use App\Core\View\BladeEngine;
 use App\Infrastructure\Database;
 use App\Core\Router\Router;
+
 class Bootstrap
 {
     private static $isBooted = false;
+    private static $basePath;
 
     public static function boot()
     {
         if (self::$isBooted) return;
 
-        // 1. Load Environment Variables (.env)
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../../');
+        // dirname(__DIR__, 3) ghat-rj3ek men src/Core/Bootstrap direct l-PHP_structer
+        self::$basePath = realpath(dirname(__DIR__, 3));
+
+        // Daba .env ghadi i-t-loda men PHP_structer/.env
+        $dotenv = \Dotenv\Dotenv::createImmutable(self::$basePath);
         $dotenv->load();
 
         $debug = $_ENV['APP_DEBUG'] ?? 'false';
 
-        // 2. Error Reporting config (mzyana f l-development)
         if ($debug === 'true') {
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
@@ -32,31 +36,35 @@ class Bootstrap
         self::$isBooted = true;
     }
 
-
-    // src/Core/Bootstrap/Bootstrap.php
     public static function run()
     {
         self::boot();
-        // Loadi l-routes men fichier khariji (bhal Laravel)
-        require_once __DIR__ . '/../../../routes/web.php';
 
-        // Executer l-route l-mounasiba
+        // Loadi l-routes men l-path s7i7 (PHP_structer/routes/web.php)
+        // Check ila knti dayr routes dakhil src aw l-root
+        $routesPath = self::$basePath . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
+
+        if (file_exists($routesPath)) {
+            require_once $routesPath;
+        } else {
+            // Ila kant routes dakhil src/Application/routes/
+            require_once self::$basePath . '/src/Application/routes/web.php';
+        }
+
         Router::resolve();
     }
 
-    /**
-     * Helper bach t-init l-Blade Engine f ay blassa
-     */
     public static function initView()
     {
-        $viewsPath = __DIR__ . '/../../../views';
-        $cachePath = __DIR__ . '/../../../storage/cache';
+        if (!self::$isBooted) self::boot();
+
+        // Daba l-paths ghadi i-kouno dima s7a7
+        $viewsPath = self::$basePath . DIRECTORY_SEPARATOR . 'views';
+        $cachePath = self::$basePath . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache';
+
         return new BladeEngine($viewsPath, $cachePath);
     }
 
-    /**
-     * Helper bach t-loadi l-Database direct
-     */
     public static function initDatabase()
     {
         return Database::getInstance()->getConnection();
