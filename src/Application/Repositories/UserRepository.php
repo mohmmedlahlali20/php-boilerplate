@@ -2,21 +2,31 @@
 
 namespace App\Application\Repositories;
 
-use App\Infrastructure\Database;
-use PDO;
-
-class UserRepository
+/**
+ * Class UserRepository
+ * * Handles database operations for the User model.
+ * Inheritance from BaseRepository provides automated table naming ('users')
+ * and model mapping (App\Domain\Models\User).
+ */
+class UserRepository extends BaseRepository
 {
-    protected $db;
-
-    public function __construct()
+    /**
+     * Retrieve all users with an active status.
+     * Uses the fluent query builder from BaseRepository.
+     * * @return array List of active User objects.
+     */
+    public function findAllActive(): array
     {
-        $this->db = Database::getInstance()->getConnection();
+        return $this->where('status', 'active')->all();
     }
 
-    public function getAllUsers()
+    /**
+     * Example of a custom search: find a user by their email.
+     * * @param string $email
+     * @return \App\Domain\Models\User|null
+     */
+    public function findById(string $id)
     {
-        $stmt = $this->db->query("SELECT * FROM users");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->where('id', $id)->first();
     }
 }

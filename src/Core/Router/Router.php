@@ -2,40 +2,73 @@
 
 namespace App\Core\Router;
 
+/**
+ * Class Router
+ * * A simple HTTP router that supports GET, POST, PUT, and DELETE methods.
+ * It also handles method spoofing for browsers that only support GET/POST.
+ */
 class Router
 {
-    protected static $routes = [];
+    /** @var array Holds all registered routes categorized by HTTP method */
+    protected static array $routes = [];
 
-    public static function get($uri, $controller)
+    /**
+     * Registers a GET route.
+     * @param string $uri The path (e.g., '/users')
+     * @param array|callable $controller The callback [Controller::class, 'method'] or Closure
+     */
+    public static function get(string $uri, $controller): void
     {
         self::$routes['GET'][$uri] = $controller;
     }
 
-    public static function post($uri, $controller)
+    /**
+     * Registers a POST route.
+     */
+    public static function post(string $uri, $controller): void
     {
         self::$routes['POST'][$uri] = $controller;
     }
 
+    /**
+     * Registers a PUT route (typically for updates).
+     */
+    public static function put(string $uri, $controller): void
+    {
+        self::$routes['PUT'][$uri] = $controller;
+    }
+
+    /**
+     * Registers a DELETE route.
+     */
+    public static function delete(string $uri, $controller): void
+    {
+        self::$routes['DELETE'][$uri] = $controller;
+    }
+
+    /**
+     * Resolves the current request URI and executes the associated controller action.
+     * Handles method spoofing for PUT and DELETE via a hidden '_method' field.
+     * * @return mixed
+     */
     public static function resolve()
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        // 1. Handling dyal Method Spoofing (PUT/DELETE)
+        // 1. Method Spoofing: Check for '_method' in POST data (e.g., <input type="hidden" name="_method" value="PUT">)
         if ($method === 'POST' && isset($_POST['_method'])) {
             $method = strtoupper($_POST['_method']);
         }
 
-        // 2. Check ila l-route kany f l-array dyalna
+        // 2. Route Check: Verify if the route exists for the given method
         if (!isset(self::$routes[$method][$uri])) {
-            http_response_code(404);
-            // Had l-view errors/404 khass t-kon dertiha f views/errors/404.med.php
-            return view('errors/404', ['title' => 'Page Not Found']);
+            return self::abort(404);
         }
 
         $callback = self::$routes[$method][$uri];
 
-        // 3. Execute l-Controller o l-Method
+        // 3. Execution: Handle [Controller, Method] arrays
         if (is_array($callback)) {
             [$controllerName, $methodName] = $callback;
 
@@ -47,13 +80,25 @@ class Router
             }
         }
 
-        // 4. Fallback l-Closures (ila knti dayr callable f routes)
+        // 4. Execution: Handle Closures/Callables
         if (is_callable($callback)) {
             return call_user_func($callback);
         }
 
-        // Final fallback 404
-        http_response_code(404);
-        return view('errors/404', ['title' => 'Error']);
+        return self::abort(404);
+    }
+
+    /**
+     * Sets HTTP response code and renders the error view.
+     * @param int $code
+     * @return mixed
+     */
+    protected static function abort(int $code = 404)
+    {
+        http_response_code($code);
+        if (function_exists('view')) {
+            return view("errors/{$code}", ['title' => "Error {$code}"]);
+        }
+        die("Error {$code}: Page Not Found");
     }
 }
