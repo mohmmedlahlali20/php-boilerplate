@@ -5,12 +5,15 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
 use App\Core\Console\Commands\MakeControllerCommand;
+use App\Core\Console\Commands\MakeMigrationCommand;
 use App\Core\Console\Commands\MakeModelCommand;
+use App\Core\Console\Commands\MigrateCommand;
 
 $application = new Application('Med Framework CLI', '1.0.0');
 
 // Register l-commands dyalk hna
 $application->add(new MakeControllerCommand());
 $application->add(new MakeModelCommand());
-
+$application->add(new MakeMigrationCommand());
+$application->add(new MigrateCommand());
 $application->run();
