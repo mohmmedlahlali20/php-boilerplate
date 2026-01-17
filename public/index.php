@@ -14,4 +14,4 @@ if (!class_exists(Router::class)) {
 }
 
 // Loadi l-routes dyalk (hit l-Router dba khawi)
-Router::load(__DIR__ . '/../src/Application/routes/web.php')::resolve();
+Bootstrap::run();
