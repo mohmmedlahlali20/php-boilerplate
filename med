@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use App\Core\Console\Commands\MakeControllerCommand;
+use App\Core\Console\Commands\MakeModelCommand;
+
+$application = new Application('Med Framework CLI', '1.0.0');
+
+// Register l-commands dyalk hna
+$application->add(new MakeControllerCommand());
+$application->add(new MakeModelCommand());
+
+$application->run();
