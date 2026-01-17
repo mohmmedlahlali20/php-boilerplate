@@ -7,11 +7,9 @@ use App\Core\Router\Router;
 
 Bootstrap::boot();
 
-// Test i-welli bhal haka:
 if (!class_exists(Router::class)) {
     echo "Class Router not found! Check file name casing in src/Core/Router/Router.php";
     die();
 }
 
-// Loadi l-routes dyalk (hit l-Router dba khawi)
 Bootstrap::run();
