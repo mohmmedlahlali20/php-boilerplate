@@ -77,6 +77,19 @@ class Bootstrap
         return new BladeEngine($viewsPath, $cachePath);
     }
 
+
+
+    /**
+     * Global helper for rendering views using the Bootstrap View Engine.
+     * @param string $view
+     * @param array $data
+     * @return string
+     */
+    function render(string $view, array $data = []): string
+    {
+        return \App\Core\Bootstrap\Bootstrap::initView()->render($view, $data);
+    }
+
     /**
      * Retrieves the singleton database connection instance.
      * @return \PDO

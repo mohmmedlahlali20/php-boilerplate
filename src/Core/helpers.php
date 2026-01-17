@@ -20,6 +20,20 @@ if (!function_exists('view')) {
     }
 }
 
+
+if (!function_exists('render')) {
+    /**
+     * Global helper to render a view using the Blade Engine.
+     * * @param string $view
+     * @param array $data
+     * @return string
+     */
+    function render(string $view, array $data = []): string
+    {
+        return Bootstrap::initView()->render($view, $data);
+    }
+}
+
 if (!function_exists('asset')) {
     /**
      * Generates a full URL for public assets (CSS, JS, Images).
@@ -86,7 +100,7 @@ if (!function_exists('dd')) {
         echo '<div style="background-color: #1a1a1a; color: #ececec; padding: 25px; border-radius: 10px; font-family: \'Fira Code\', monospace; line-height: 1.6; margin: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">';
         echo '<div style="display: flex; align-items: center; margin-bottom: 15px;">';
         echo '<span style="background: #ff2d20; color: white; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-right: 10px;">DEBUG</span>';
-        echo '<small style="color: #666;">OptimaCV Debugger</small>';
+        echo '<small style="color: #666;">die dump Debugger</small>';
         echo '</div>';
 
         foreach ($vars as $var) {
