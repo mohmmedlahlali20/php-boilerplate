@@ -3,12 +3,15 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Core\Bootstrap\Bootstrap;
+use App\Core\Router\Router;
 
-// Lansi l-common code (Env, Error handling...)
 Bootstrap::boot();
 
-// Exemple dyal usage:
-$db = Bootstrap::initDatabase();
-$view = Bootstrap::initView();
+// Test i-welli bhal haka:
+if (!class_exists(Router::class)) {
+    echo "Class Router not found! Check file name casing in src/Core/Router/Router.php";
+    die();
+}
 
-echo $view->render('home', ['name' => 'Mohammed']);
+// Loadi l-routes dyalk (hit l-Router dba khawi)
+Router::load(__DIR__ . '/../src/Application/routes/web.php')::resolve();
