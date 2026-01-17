@@ -1,6 +1,7 @@
 {
     "name": "mohammed/optima-cv",
     "description": "Full-stack MVC structure ",
+    "license": "MIT",
     "type": "project",
     "autoload": {
         "psr-4": {
