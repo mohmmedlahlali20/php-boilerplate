@@ -7,19 +7,26 @@ use App\Core\View\BladeEngine;
 use App\Infrastructure\Database;
 use App\Core\Router\Router;
 
+/**
+ * Class Bootstrap
+ * Responsible for initializing the framework environment and core components.
+ */
 class Bootstrap
 {
     private static $isBooted = false;
     private static $basePath;
 
+    /**
+     * Bootstraps the application by loading environment variables and setting error levels.
+     */
     public static function boot()
     {
         if (self::$isBooted) return;
 
-        // dirname(__DIR__, 3) ghat-rj3ek men src/Core/Bootstrap direct l-PHP_structer
+        // dirname(__DIR__, 3) returns from src/Core/Bootstrap to the project root
         self::$basePath = realpath(dirname(__DIR__, 3));
 
-        // Daba .env ghadi i-t-loda men PHP_structer/.env
+        // Load .env from the project root
         $dotenv = \Dotenv\Dotenv::createImmutable(self::$basePath);
         $dotenv->load();
 
@@ -36,35 +43,44 @@ class Bootstrap
         self::$isBooted = true;
     }
 
+    /**
+     * Executes the application lifecycle: booting, loading routes, and resolving the request.
+     */
     public static function run()
     {
         self::boot();
 
-        // Loadi l-routes men l-path s7i7 (PHP_structer/routes/web.php)
-        // Check ila knti dayr routes dakhil src aw l-root
+        // Locates routes in the /routes/web.php file
         $routesPath = self::$basePath . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
 
         if (file_exists($routesPath)) {
             require_once $routesPath;
         } else {
-            // Ila kant routes dakhil src/Application/routes/
+            // Fallback for alternative route location
             require_once self::$basePath . '/src/Application/routes/web.php';
         }
 
         Router::resolve();
     }
 
+    /**
+     * Initializes and returns the Blade Template Engine instance.
+     * @return BladeEngine
+     */
     public static function initView()
     {
         if (!self::$isBooted) self::boot();
 
-        // Daba l-paths ghadi i-kouno dima s7a7
         $viewsPath = self::$basePath . DIRECTORY_SEPARATOR . 'views';
         $cachePath = self::$basePath . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'cache';
 
         return new BladeEngine($viewsPath, $cachePath);
     }
 
+    /**
+     * Retrieves the singleton database connection instance.
+     * @return \PDO
+     */
     public static function initDatabase()
     {
         return Database::getInstance()->getConnection();
