@@ -8,8 +8,8 @@
             </a>
           </li>
           <li>
-            <a href="/test-users" class="text-base text-gray-900 font-normal rounded-lg flex items-center p-2 hover:bg-gray-100 group">
-              <span class="ml-3">Users Management</span>
+            <a href="/" class="text-base text-gray-900 font-normal rounded-lg flex items-center p-2 hover:bg-gray-100 group">
+              <span class="ml-3"></span>
             </a>
           </li>
         </ul>

@@ -11,11 +11,11 @@
 
 <body class="bg-gray-50">
 
-    @include('partials/nav')
+    <!-- @include('partials/nav') -->
 
     <div class="flex overflow-hidden bg-white pt-16">
 
-        @include('partials/sidebar')
+        <!-- @include('partials/sidebar') -->
 
         <div id="main-content" class="h-full w-full bg-gray-50 relative overflow-y-auto lg:ml-64">
             <main>
@@ -24,7 +24,7 @@
                 </div>
             </main>
 
-            @include('partials/footer')
+            <!-- @include('partials/footer') -->
         </div>
 
     </div>

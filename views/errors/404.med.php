@@ -9,14 +9,14 @@
         </div>
         <div class="mt-8">
             <h2 class="text-2xl font-semibold text-gray-800 md:text-3xl">
-                Oups! Had l-blassa ma-kanyach.
+                Oops! This page doesn't exist.
             </h2>
             <p class="mt-4 text-gray-500">
-                Ghaliban l-lien li t-tab3ti fih chi ghalat aw l-page t-m7at.
+                The link you followed might be broken, or the page has been moved or deleted.
             </p>
             <div class="mt-10">
                 <a href="/" class="px-6 py-3 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-50">
-                    Rje3 l-Dashboard
+                    Return Home
                 </a>
             </div>
         </div>
