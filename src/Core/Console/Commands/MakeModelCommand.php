@@ -9,30 +9,38 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MakeModelCommand extends Command
 {
-    protected static $defaultName = 'make:model';
-
     protected function configure()
     {
-        $this->setDescription('Creates a new Model class in Domain')
-             ->addArgument('name', InputArgument::REQUIRED, 'The name of the Model');
+        $this
+            ->setName('make:model')
+            ->setDescription('Creates a new Model class in Domain')
+            ->addArgument('name', InputArgument::REQUIRED, 'The name of the Model');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $name = $input->getArgument('name');
-        // Ghadi i-t-7et f Domain/Models bhal l-arborescence li 3ndek
-        $path = __DIR__ . '/../../../Domain/Models/' . $name . '.php'; 
+        $className = $input->getArgument('name');
+        
+        $path = __DIR__ . '/../../../Domain/Models/' . $className . '.php'; 
 
         if (file_exists($path)) {
-            $output->writeln("<error>Model {$name} already exists!</error>");
+            $output->writeln("<error>Model {$className} already exists!</error>");
             return Command::FAILURE;
         }
 
-        $template = "<?php\n\nnamespace App\Domain\Models;\n\nuse App\Infrastructure\Database;\n\nclass {$name}\n{\n    protected \$table = '" . strtolower($name) . "s';\n\n    public function __construct()\n    {\n        // logic...\n    }\n}";
+        $template = "<?php
+        \n\nnamespace App\Domain\Models;
+        \n\nuse App\Domain\Models\Model;
+        \n\nclass {$className} extends Model\n
+        {\n    protected \$table = '" . strtolower($className) . "s';\n\n    public function __construct()\n    {\n        parent::__construct();\n    }\n}";
+
+        if (!is_dir(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
 
         file_put_contents($path, $template);
 
-        $output->writeln("<info>Model {$name} created in Domain/Models!</info>");
+        $output->writeln("<info>Model {$className} created successfully!</info>");
         return Command::SUCCESS;
     }
 }
