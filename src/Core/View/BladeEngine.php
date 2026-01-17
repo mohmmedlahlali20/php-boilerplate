@@ -16,34 +16,39 @@ class BladeEngine implements TemplateEngineInterface
     {
         $this->viewsPath = $viewsPath;
         $this->cachePath = $cachePath;
+
+        // Cree l-folder d-l-cache ila malkahch
+        if (!is_dir($this->cachePath)) {
+            mkdir($this->cachePath, 0777, true);
+        }
     }
 
     public function render(string $view, array $data = []): string
     {
-        $viewPath = $this->viewsPath . '/' . $view . '.med.php';
-        $cachePath = $this->cachePath . '/' . md5($view) . '.php';
+        $viewClean = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $view);
+        $viewPath = rtrim($this->viewsPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $viewClean . '.med.php';
+        $cacheFile = $this->cachePath . DIRECTORY_SEPARATOR . md5($view) . '.php';
 
-        // Check if view exists
+        // dd($viewPath);
+
         if (!file_exists($viewPath)) {
             throw new \Exception("View file not found: {$viewPath}");
         }
 
-        // Compile if cache is invalid
-        if (!$this->isCacheValid($viewPath, $cachePath)) {
+        if (!$this->isCacheValid($viewPath, $cacheFile)) {
             $content = file_get_contents($viewPath);
             $compiled = $this->compile($content);
-            file_put_contents($cachePath, $compiled);
+            file_put_contents($cacheFile, $compiled);
         }
 
         extract($data);
         ob_start();
-        include $cachePath;
+        include $cacheFile; // Use l-path d-l-fichier l-m7soub
         $content = ob_get_clean();
 
-        // Handle Layout Inheritance (@extends)
         if ($this->layout) {
             $layoutView = $this->layout;
-            $this->layout = null; // Reset for next use
+            $this->layout = null;
             return $this->render($layoutView, $data);
         }
 
@@ -52,24 +57,22 @@ class BladeEngine implements TemplateEngineInterface
 
     public function compile(string $content): string
     {
-        // 1. Inheritance Directives
+        // 1. Inheritance
         $content = preg_replace('/@extends\(\'(.*?)\'\)/', '<?php $this->layout = "$1"; ?>', $content);
         $content = preg_replace('/@yield\(\'(.*?)\'\)/', '<?php echo $this->sections["$1"] ?? ""; ?>', $content);
         $content = preg_replace('/@section\(\'(.*?)\'\)/', '<?php $this->currentSection = "$1"; ob_start(); ?>', $content);
         $content = preg_replace('/@endsection/', '<?php $this->sections[$this->currentSection] = ob_get_clean(); ?>', $content);
-
-        // 2. Method Spoofing (PUT/DELETE)
+        $content = preg_replace('/@include\(\'(.*?)\'\)/', '<?php echo $this->render("$1", $data); ?>', $content);
+        // 2. Method Spoofing
         $content = preg_replace('/@method\(\'(.*?)\'\)/', '<input type="hidden" name="_method" value="$1">', $content);
-        
-        // 3. Variables {{ $var }}
+
+        // 3. Variables
         $content = preg_replace('/{{\s*(.+?)\s*}}/', '<?php echo htmlspecialchars((string)$1); ?>', $content);
-        
-        // 4. IF Statements
+
+        // 4. Control Structures
         $content = preg_replace('/@if\s*\((.+?)\)/', '<?php if($1): ?>', $content);
         $content = preg_replace('/@else/', '<?php else: ?>', $content);
         $content = preg_replace('/@endif/', '<?php endif; ?>', $content);
-        
-        // 5. Foreach Loops
         $content = preg_replace('/@foreach\s*\((.+?)\)/', '<?php foreach($1): ?>', $content);
         $content = preg_replace('/@endforeach/', '<?php endforeach; ?>', $content);
 
@@ -78,8 +81,6 @@ class BladeEngine implements TemplateEngineInterface
 
     private function isCacheValid($view, $cache): bool
     {
-        // Always re-compile in development if you prefer, 
-        // but this logic checks if original file was modified.
         return file_exists($cache) && filemtime($view) <= filemtime($cache);
     }
 }
