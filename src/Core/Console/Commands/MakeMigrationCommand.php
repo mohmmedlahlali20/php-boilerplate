@@ -8,8 +8,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Infrastructure\Migrations\Migration;
 
+/**
+ * Class MakeMigrationCommand
+ * Handles the generation of migration files with a timestamped naming convention.
+ */
 class MakeMigrationCommand extends Command
 {
+    /**
+     * Configures the command name, description, and required arguments.
+     */
     protected function configure()
     {
         $this->setName('make:migration')
@@ -17,6 +24,12 @@ class MakeMigrationCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the migration');
     }
 
+    /**
+     * Executes the logic to generate a migration boilerplate file.
+     * * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int Command success status
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $name = $input->getArgument('name');
@@ -24,8 +37,10 @@ class MakeMigrationCommand extends Command
         $className = 'Migration_' . $timestamp . '_' . $name;
         $fileName = $timestamp . '_' . $name . '.php';
 
+        // Path to the infrastructure layer where migrations are stored
         $path = __DIR__ . '/../../../Infrastructure/Migrations/' . $fileName;
 
+        // Migration file boilerplate using the Schema and Blueprint system
         $template = "<?php
 
         use App\Core\Database\Schema\Schema;
@@ -34,6 +49,9 @@ class MakeMigrationCommand extends Command
         
         class Migration_{$timestamp}_{$name} extends Migration
         {
+            /**
+             * Run the migrations (Create Table).
+             */
             public function up(): void
             {
                 Schema::create('{$name}', function (Blueprint \$table) {
@@ -43,12 +61,18 @@ class MakeMigrationCommand extends Command
                 });
             }
 
+            /**
+             * Reverse the migrations (Drop Table).
+             */
             public function down(): void
             {
                 // SQL DROP logic
             }
         }";
+
+        // Write the template to the file system
         file_put_contents($path, $template);
+
         $output->writeln("<info>Migration created: {$fileName}</info>");
         return Command::SUCCESS;
     }
