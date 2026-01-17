@@ -2,10 +2,19 @@
 
 use App\Core\Bootstrap\Bootstrap;
 
-function view($view, $data = []) {
+function view($view, $data = [])
+{
     // Kat-3yet l-Bootstrap lli aslan s-lahna fih l-path
     $engine = \App\Core\Bootstrap\Bootstrap::initView();
     echo $engine->render($view, $data);
+}
+
+
+function asset($path)
+{
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+    $host = $_SERVER['HTTP_HOST'];
+    return $protocol . "://" . $host . "/" . ltrim($path, '/');
 }
 
 if (!function_exists('db')) {
@@ -14,6 +23,7 @@ if (!function_exists('db')) {
         return Bootstrap::initDatabase();
     }
 }
+
 if (!function_exists('dd')) {
     function dd(...$vars)
     {
