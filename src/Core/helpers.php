@@ -2,12 +2,10 @@
 
 use App\Core\Bootstrap\Bootstrap;
 
-if (!function_exists('view')) {
-    function view(string $view, array $data = [])
-    {
-        $engine = Bootstrap::initView();
-        echo $engine->render($view, $data);
-    }
+function view($view, $data = []) {
+    // Kat-3yet l-Bootstrap lli aslan s-lahna fih l-path
+    $engine = \App\Core\Bootstrap\Bootstrap::initView();
+    echo $engine->render($view, $data);
 }
 
 if (!function_exists('db')) {
