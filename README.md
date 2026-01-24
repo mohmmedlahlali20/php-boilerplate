@@ -58,7 +58,10 @@ The framework comes with a powerful CLI tool:
 
 | Command | Description |
 |---------|-------------|
+| `php med key:generate` | Generate the application security key |
 | `php med make:controller User` | Creates `UserController.php` |
 | `php med make:model User` | Creates `User.php` Domain Model |
+| `php med make:service User` | Creates `UserService.php` |
+| `php med make:repository User` | Creates `UserRepository.php` |
 | `php med make:migration create_users_table` | Creates a new migration file |
 | `php med migrate` | Runs pending migrations |
