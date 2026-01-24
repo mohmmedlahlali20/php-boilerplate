@@ -1,15 +1,11 @@
 <?php
-
 require_once __DIR__ . '/../vendor/autoload.php';
+// 1. Load helpers from src/Core
+require_once __DIR__ . '/../src/Core/helpers.php'; 
 
-use App\Core\Bootstrap\Bootstrap;
+// 2. Load routes from src/Application/routes
+require_once __DIR__ . '/../src/Application/routes/web.php'; 
 use App\Core\Router\Router;
 
-Bootstrap::boot();
-
-if (!class_exists(Router::class)) {
-    echo "Class Router not found! Check file name casing in src/Core/Router/Router.php";
-    die();
-}
-
-Bootstrap::run();
+// 3. Resolve the request
+Router::resolve();
