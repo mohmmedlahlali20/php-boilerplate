@@ -4,7 +4,7 @@ namespace App\Core\Http;
 
 class Pipeline
 {
-    protected ?object $passable = null;
+    protected mixed $passable = null;
     protected array $pipes = [];
 
     /**
