@@ -270,6 +270,18 @@
                             <td class="px-3 py-4 text-sm text-gray-500">Create a new database migration file.</td>
                         </tr>
                          <tr>
+                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med key:generate</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">Generate the application security key.</td>
+                        </tr>
+                         <tr>
+                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:service</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">Create a new Service class.</td>
+                        </tr>
+                         <tr>
+                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:repository</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">Create a new Repository class.</td>
+                        </tr>
+                         <tr>
                              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med migrate</td>
                             <td class="px-3 py-4 text-sm text-gray-500">Run pending database migrations.</td>
                         </tr>
