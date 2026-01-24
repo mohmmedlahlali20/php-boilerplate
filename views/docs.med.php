@@ -19,7 +19,8 @@
             Architecture
         </h3>
         <ul class="space-y-1 mb-8 pl-6 border-l border-gray-100">
-             <li><a href="#routing" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Routing</a></li>
+            <li><a href="#routing" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Routing</a></li>
+            <li><a href="#middleware" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Middleware</a></li>
             <li><a href="#controllers" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Controllers</a></li>
             <li><a href="#models" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Models (Domain)</a></li>
             <li><a href="#repositories" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Repositories</a></li>
@@ -42,6 +43,7 @@
         <ul class="space-y-1 mb-8 pl-6 border-l border-gray-100">
              <li><a href="#views" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Templating</a></li>
             <li><a href="#requests" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Requests & Responses</a></li>
+            <li><a href="#security" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Security</a></li>
             <li><a href="#helpers" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Helpers</a></li>
             <li><a href="#cli" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">CLI Commands</a></li>
         </ul>
@@ -134,7 +136,6 @@
             </p>
 
             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
 <span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Router\Router</span>;
 <span class="text-purple-400">use</span> <span class="text-blue-300">App\Application\Controllers\UserController</span>;
 
@@ -143,9 +144,43 @@
     <span class="text-purple-400">return</span> <span class="text-yellow-300">render</span>(<span class="text-green-300">'hello_world'</span>);
 });
 
-<span class="text-gray-500">// 2. Controller Route (Recommended)</span>
-<span class="text-blue-300">Router</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/users'</span>, [<span class="text-blue-300">UserController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'index'</span>]);
-<span class="text-blue-300">Router</span>::<span class="text-yellow-300">post</span>(<span class="text-green-300">'/users/store'</span>, [<span class="text-blue-300">UserController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'store'</span>]);</pre>
+<span class="text-gray-500">// 2. Dynamic Routing</span>
+<span class="text-blue-300">Router</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/user/{id}'</span>, [<span class="text-blue-300">UserController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'show'</span>]);
+
+<span class="text-gray-500">// 3. Middleware Protection</span>
+<span class="text-blue-300">Router</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/dashboard'</span>, [<span class="text-blue-300">DashboardController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'index'</span>])
+      -><span class="text-yellow-300">middleware</span>(<span class="text-green-300">'auth'</span>);</pre>
+            </div>
+        </section>
+
+        <!-- Middleware -->
+        <section id="middleware" class="mb-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
+                Middleware
+                <a href="#middleware" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
+            </h2>
+            <p class="text-gray-600 mb-6">
+                Middleware provide a mechanism for inspecting and filtering HTTP requests entering your application.
+            </p>
+
+             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
+                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
+<span class="text-purple-400">namespace</span> <span class="text-blue-300">App\Application\Middlewares</span>;
+
+<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Middleware\MiddlewareInterface</span>;
+<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Response</span>;
+
+<span class="text-purple-400">class</span> <span class="text-yellow-300">AuthMiddleware</span> <span class="text-purple-400">implements</span> <span class="text-yellow-300">MiddlewareInterface</span>
+{
+    <span class="text-purple-400">public function</span> <span class="text-blue-300">handle</span>(<span class="text-blue-300">$request</span>, <span class="text-purple-400">callable</span> <span class="text-blue-300">$next</span>)
+    {
+        <span class="text-purple-400">if</span> (!<span class="text-yellow-300">isset</span>(<span class="text-blue-300">$_SESSION</span>[<span class="text-green-300">'user'</span>])) {
+             <span class="text-purple-400">return</span> <span class="text-blue-300">Response</span>::<span class="text-yellow-300">redirect</span>(<span class="text-green-300">'/login'</span>);
+        }
+        
+        <span class="text-purple-400">return</span> <span class="text-blue-300">$next</span>(<span class="text-blue-300">$request</span>);
+    }
+}</pre>
             </div>
         </section>
 
@@ -231,6 +266,72 @@
         &lt;button&gt;Admin Panel&lt;/button&gt;
     <span class="text-purple-400">&#64;endif</span>
 <span class="text-purple-400">&#64;endsection</span></pre>
+            </div>
+        </section>
+
+        <!-- Requests -->
+        <section id="requests" class="mb-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
+                Requests & Responses
+                <a href="#requests" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
+            </h2>
+            <p class="text-gray-600 mb-6">
+                Interact with HTTP flow using the static <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">Request</code> and <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">Response</code> classes.
+            </p>
+             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
+                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
+<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Request</span>;
+<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Response</span>;
+
+<span class="text-purple-400">$data</span> = <span class="text-blue-300">Request</span>::<span class="text-yellow-300">all</span>();
+<span class="text-purple-400">$input</span> = <span class="text-blue-300">Request</span>::<span class="text-yellow-300">input</span>(<span class="text-green-300">'key'</span>, <span class="text-green-300">'default'</span>);
+
+<span class="text-gray-500">// Return JSON</span>
+<span class="text-blue-300">Response</span>::<span class="text-yellow-300">json</span>([<span class="text-green-300">'status'</span> => <span class="text-green-300">'ok'</span>]);</pre>
+            </div>
+        </section>
+
+        <!-- Security -->
+        <section id="security" class="mb-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
+                Security
+                <a href="#security" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
+            </h2>
+            <p class="text-gray-600 mb-6">
+                Protect your application against common vulnerabilities.
+            </p>
+            
+            <h3 class="text-xl font-bold text-gray-900 mb-4">CSRF Protection</h3>
+            <p class="text-gray-600 mb-4">Use the <code>&#64;CSRF</code> directive in your forms to generate a hidden token field.</p>
+             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
+                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
+&lt;form method="POST" action="/update"&gt;
+    <span class="text-purple-400">&#64;CSRF</span>
+    &lt;input type="text" name="data" /&gt;
+    &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</pre>
+            </div>
+        </section>
+
+        <!-- Helpers -->
+        <section id="helpers" class="mb-20">
+             <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
+                Helpers
+                <a href="#helpers" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
+            </h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <code class="text-purple-600 font-bold">view($name, $data)</code>
+                    <p class="text-sm text-gray-600 mt-1">Render a Blade view.</p>
+                 </div>
+                 <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <code class="text-purple-600 font-bold">csrf_token()</code>
+                    <p class="text-sm text-gray-600 mt-1">Get the current CSRF token string.</p>
+                 </div>
+                  <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <code class="text-purple-600 font-bold">dd($var)</code>
+                    <p class="text-sm text-gray-600 mt-1">Dump and die for debugging.</p>
+                 </div>
             </div>
         </section>
 
