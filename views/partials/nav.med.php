@@ -37,6 +37,12 @@
             <li>
                 <a href="/showcase" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-brand-600 md:p-0 transition-colors">Showcase</a>
             </li>
+             <li>
+                <a href="/security-test" class="block py-2 px-3 text-red-600 font-bold rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-red-700 md:p-0 transition-colors flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Security Lab
+                </a>
+            </li>
             <li>
                 <a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-brand-600 md:p-0 transition-colors">Community</a>
             </li>
