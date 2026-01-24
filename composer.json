@@ -1,6 +1,6 @@
 {
-    "name": "mohammed/optima-cv",
-    "description": "Full-stack MVC structure ",
+    "name": "mohmmedlahlali20/php-boilerplate", 
+    "description": "Full-stack MVC structure",
     "license": "MIT",
     "type": "project",
     "autoload": {
