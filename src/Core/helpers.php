@@ -8,18 +8,14 @@ use App\Core\Bootstrap\Bootstrap;
 
 if (!function_exists('view')) {
     /**
-     * Renders a view using the BladeEngine initialized in Bootstrap.
-     * * @param string $view Name of the view file (without .med.php)
-     * @param array $data Associative array of data to pass to the view
-     * @return void
+     * @return string
      */
-    function view(string $view, array $data = []): void
+    function view(string $view, array $data = []): string
     {
-        $engine = Bootstrap::initView();
-        echo $engine->render($view, $data);
+        // Change from 'echo render' to 'return render'
+        return render($view, $data); 
     }
 }
-
 
 if (!function_exists('render')) {
     /**
@@ -114,5 +110,16 @@ if (!function_exists('dd')) {
 
         echo '</div>';
         die();
+    }
+}
+
+if (!function_exists('csrf_token')) {
+    /**
+     * Get the current CSRF token.
+     * @return string
+     */
+    function csrf_token(): string
+    {
+        return \App\Core\Security\Csrf::generate();
     }
 }
