@@ -10,7 +10,9 @@ A lightweight, high-performance PHP MVC framework designed for rapid development
 * **MVC Architecture**: Clear separation between Application logic, Domain models, and Infrastructure.
 * **Blade-like Engine**: Native support for `@extends`, `@section`, and custom `@CSRF` directives.
 * **Modern Routing**: Regex-based routing with parameter support `user/{id}`.
+* **Middleware Pipeline**: robust request filtering with global and route-specific middleware.
 * **Security**: Built-in CSRF protection and Session management.
+* **Dependency Management**: Fully integrated with Composer.
 
 ---
 
