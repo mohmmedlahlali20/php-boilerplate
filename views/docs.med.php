@@ -75,7 +75,7 @@
                 <h2 class="text-3xl font-bold text-gray-900">Installation</h2>
             </div>
           
-            <p class="text-gray-600 mb-6">Start by cloning the boilerplate and installing dependencies via Composer.</p>
+            <p class="text-gray-600 mb-6">Start by creating a new project via Composer. This will automatically set up the application structure for you.</p>
             
             <div class="bg-gray-900 rounded-xl overflow-hidden shadow-2xl mb-6">
                 <div class="flex items-center px-4 py-2 bg-gray-800 border-b border-gray-700 space-x-2">
@@ -85,7 +85,7 @@
                     <span class="ml-2 text-xs text-gray-400 font-mono">Terminal</span>
                 </div>
                 <pre class="p-6 text-sm text-gray-300 font-mono leading-relaxed">
-<span class="text-green-400">$</span> git clone https://github.com/mohmmedlahlali20/php-boilerplate.git my-app
+<span class="text-green-400">$</span> composer create-project mohammed/php-boilerplate my-app
 <span class="text-green-400">$</span> cd my-app
 <span class="text-green-400">$</span> composer install
 <span class="text-green-400">$</span> cp .env.example .env
