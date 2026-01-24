@@ -2,103 +2,148 @@
 
 namespace App\Core\Router;
 
-/**
- * Class Router
- * * A simple HTTP router that supports GET, POST, PUT, and DELETE methods.
- * It also handles method spoofing for browsers that only support GET/POST.
- */
+use App\Core\Http\Request;
+use App\Core\Http\Response;
+
 class Router
 {
-    /** @var array Holds all registered routes categorized by HTTP method */
     protected static array $routes = [];
+    protected static array $middlewares = [];
+    protected static ?string $lastRouteKey = null;
 
-    /**
-     * Registers a GET route.
-     * @param string $uri The path (e.g., '/users')
-     * @param array|callable $controller The callback [Controller::class, 'method'] or Closure
-     */
-    public static function get(string $uri, $controller): void
+    // --- Route Registration ---
+
+    public static function get($uri, $callback)
     {
-        self::$routes['GET'][$uri] = $controller;
+        return self::addRoute('get', $uri, $callback);
+    }
+
+    public static function post($uri, $callback)
+    {
+        return self::addRoute('post', $uri, $callback);
+    }
+
+    public static function put($uri, $callback)
+    {
+        return self::addRoute('put', $uri, $callback);
+    }
+
+    public static function patch($uri, $callback)
+    {
+        return self::addRoute('patch', $uri, $callback);
+    }
+
+    public static function delete($uri, $callback)
+    {
+        return self::addRoute('delete', $uri, $callback);
     }
 
     /**
-     * Registers a POST route.
+     * Internal method to add a route and return a Route instance (simulation for chaining).
      */
-    public static function post(string $uri, $controller): void
+    protected static function addRoute($method, $uri, $callback)
     {
-        self::$routes['POST'][$uri] = $controller;
+        // Convert URI params like {id} to regex groups
+        // /user/{id}  ->  /user/([^/]+)
+        // /posts/{slug}/edit -> /posts/([^/]+)/edit
+        $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $uri);
+        $pattern = "#^" . $pattern . "$#";
+
+        $routeKey = $method . $uri;
+        self::$lastRouteKey = $routeKey;
+
+        self::$routes[] = [
+            'method' => $method,
+            'pattern' => $pattern,
+            'callback' => $callback,
+            'middlewares' => []
+        ];
+
+        return new static; // return instance to allow chaining
     }
 
     /**
-     * Registers a PUT route (typically for updates).
+     * Attach middleware to the last registered route.
+     * Usage: Router::get(...)->middleware('auth');
      */
-    public static function put(string $uri, $controller): void
+    public function middleware(string $alias)
     {
-        self::$routes['PUT'][$uri] = $controller;
+        // Add middleware to the last route in the array
+        $lastKey = array_key_last(self::$routes);
+        if ($lastKey !== null) {
+            self::$routes[$lastKey]['middlewares'][] = $alias;
+        }
+        return $this;
     }
 
-    /**
-     * Registers a DELETE route.
-     */
-    public static function delete(string $uri, $controller): void
-    {
-        self::$routes['DELETE'][$uri] = $controller;
-    }
 
-    /**
-     * Resolves the current request URI and executes the associated controller action.
-     * Handles method spoofing for PUT and DELETE via a hidden '_method' field.
-     * * @return mixed
-     */
+    // --- Resolution ---
+
     public static function resolve()
     {
-        $method = $_SERVER['REQUEST_METHOD'];
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-        // 1. Method Spoofing: Check for '_method' in POST data (e.g., <input type="hidden" name="_method" value="PUT">)
-        if ($method === 'POST' && isset($_POST['_method'])) {
-            $method = strtoupper($_POST['_method']);
-        }
-
-        // 2. Route Check: Verify if the route exists for the given method
-        if (!isset(self::$routes[$method][$uri])) {
-            return self::abort(404);
-        }
-
-        $callback = self::$routes[$method][$uri];
-
-        // 3. Execution: Handle [Controller, Method] arrays
-        if (is_array($callback)) {
-            [$controllerName, $methodName] = $callback;
-
-            if (class_exists($controllerName)) {
-                $controller = new $controllerName();
-                if (method_exists($controller, $methodName)) {
-                    return $controller->$methodName();
-                }
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+        
+        // --- Method Spoofing ---
+        $method = strtolower($_SERVER['REQUEST_METHOD']);
+        if ($method === 'post' && isset($_POST['_method'])) {
+            $spoofed = strtolower($_POST['_method']);
+            if (in_array($spoofed, ['put', 'patch', 'delete'])) {
+                $method = $spoofed;
             }
         }
 
-        // 4. Execution: Handle Closures/Callables
-        if (is_callable($callback)) {
-            return call_user_func($callback);
+        // --- Iteration & Matching ---
+        foreach (self::$routes as $route) {
+            if ($route['method'] !== $method) {
+                continue;
+            }
+
+            if (preg_match($route['pattern'], $uri, $matches)) {
+                // Remove numeric keys from regex match
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+
+                // --- Middleware Execution ---
+                // For now, we just skip it as we haven't implemented the Kernel/Registry.
+                // In a future step, we would resolve these aliases to classes.
+                // self::handleMiddlewares($route['middlewares']);
+                 
+                // --- Callback Execution ---
+                return self::executeAction($route['callback'], $params);
+            }
         }
 
-        return self::abort(404);
+        // 404 Not Found
+        http_response_code(404);
+        echo render('errors/404', ['title' => 'Page Not Found']);
     }
 
-    /**
-     * Sets HTTP response code and renders the error view.
-     * @param int $code
-     * @return mixed
-     */
-    protected static function abort(int $code = 404)
+    protected static function executeAction($callback, $params)
     {
-        http_response_code($code);
-        if (function_exists('view')) {
-            return view("errors/{$code}", ['title' => "Error {$code}"]);
+        // 1. Closure
+        if (is_callable($callback)) {
+            echo call_user_func_array($callback, $params);
+            return;
         }
-        die("Error {$code}: Page Not Found");
+
+        // 2. Controller Array: [Controller::class, 'method']
+        if (is_array($callback)) {
+            [$class, $method] = $callback;
+            
+            if (!class_exists($class)) {
+                throw new \Exception("Controller class $class not found");
+            }
+
+            $controller = new $class();
+            
+            if (!method_exists($controller, $method)) {
+                throw new \Exception("Method $method not found in controller $class");
+            }
+
+            $result = call_user_func_array([$controller, $method], $params);
+            
+            if (is_string($result)) {
+                echo $result;
+            }
+        }
     }
 }
