@@ -103,12 +103,30 @@ class Router
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
                 // --- Middleware Execution ---
-                // For now, we just skip it as we haven't implemented the Kernel/Registry.
-                // In a future step, we would resolve these aliases to classes.
-                // self::handleMiddlewares($route['middlewares']);
-                 
-                // --- Callback Execution ---
-                return self::executeAction($route['callback'], $params);
+                $kernel = new \App\Core\Http\Kernel();
+                $globalMiddleware = $kernel->getGlobalMiddleware();
+                
+                // Resolve route middlewares aliases to class names
+                $routeMiddleware = array_map(function($alias) use ($kernel) {
+                    return $kernel->getRouteMiddleware($alias);
+                }, $route['middlewares']);
+                
+                // Filter out nulls (invalid aliases)
+                $routeMiddleware = array_filter($routeMiddleware);
+
+                $allMiddleware = array_merge($globalMiddleware, $routeMiddleware);
+
+                // --- Pipeline Execution ---
+                // We pass the parameters as the "request" payload for now, 
+                // but ideally we should pass a Request object.
+                // For simplicity in this step, we'll pass the params array.
+                
+                return (new \App\Core\Http\Pipeline())
+                    ->send($params) 
+                    ->through($allMiddleware)
+                    ->then(function ($params) use ($route) {
+                        return self::executeAction($route['callback'], $params);
+                    });
             }
         }
 
