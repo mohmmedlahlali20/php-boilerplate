@@ -16,6 +16,7 @@ class Kernel
      */
     protected array $routeMiddleware = [
         'auth' => \App\Application\Middlewares\AuthMiddleware::class,
+        'csrf' => \App\Application\Middlewares\CsrfMiddleware::class,
     ];
 
     /**
