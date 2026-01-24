@@ -8,7 +8,11 @@ use App\Core\Console\Commands\MakeControllerCommand;
 use App\Core\Console\Commands\MakeMigrationCommand;
 use App\Core\Console\Commands\MakeModelCommand;
 use App\Core\Console\Commands\MigrateCommand;
+
 use App\Core\Console\Commands\RunServerCommand;
+use App\Core\Console\Commands\KeyGenerateCommand;
+use App\Core\Console\Commands\MakeServiceCommand;
+use App\Core\Console\Commands\MakeRepositoryCommand;
 
 $application = new Application('Med Framework CLI', '1.0.0');
 
@@ -17,4 +21,7 @@ $application->add(new MakeModelCommand());
 $application->add(new MakeMigrationCommand());
 $application->add(new MigrateCommand());
 $application->add(new RunServerCommand());
+$application->add(new KeyGenerateCommand());
+$application->add(new MakeServiceCommand());
+$application->add(new MakeRepositoryCommand());
 $application->run(); 
