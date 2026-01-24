@@ -2,7 +2,8 @@
     <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
       <div class="flex-1 px-3 space-y-1 bg-white divide-y divide-gray-200">
         <ul class="space-y-2 pb-2">
-          <li>
+          <li>  
+            
             <a href="/" class="text-base text-gray-900 font-normal rounded-lg flex items-center p-2 hover:bg-gray-100 group">
               <span class="ml-3">Dashboard</span>
             </a>
