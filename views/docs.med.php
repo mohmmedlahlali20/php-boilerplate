@@ -1,396 +1,414 @@
 @extends('layouts/master')
 
 @section('main_content')
-<div class="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <!-- Sidebar Navigation -->
-    <aside class="w-64 hidden lg:block pr-8 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
-        <h3 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-sm flex items-center">
-            <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            Getting Started
-        </h3>
-        <ul class="space-y-1 mb-8 pl-6 border-l border-gray-100">
-            <li><a href="#introduction" class="text-blue-600 font-medium hover:text-blue-700 block py-1 border-l-2 border-blue-600 -ml-[25px] pl-[23px]">Introduction</a></li>
-            <li><a href="#installation" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Installation</a></li>
-            <li><a href="#structure" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Directory Structure</a></li>
-        </ul>
+<style>
+    :root {
+        --docs-primary: #4F46E5;
+        --docs-bg: #F9FAFB;
+        --docs-sidebar: #FFFFFF;
+        --docs-text: #1F2937;
+        --docs-code-bg: #111827;
+    }
 
-        <h3 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-sm flex items-center">
-            <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            Architecture
-        </h3>
-        <ul class="space-y-1 mb-8 pl-6 border-l border-gray-100">
-            <li><a href="#routing" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Routing</a></li>
-            <li><a href="#middleware" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Middleware</a></li>
-            <li><a href="#controllers" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Controllers</a></li>
-            <li><a href="#models" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Models (Domain)</a></li>
-            <li><a href="#repositories" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Repositories</a></li>
-            <li><a href="#services" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Services</a></li>
-        </ul>
+    .docs-container {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        min-height: calc(100vh - 64px);
+        background: var(--docs-bg);
+    }
 
-         <h3 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-sm flex items-center">
-            <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
-            Database
-        </h3>
-        <ul class="space-y-1 mb-8 pl-6 border-l border-gray-100">
-            <li><a href="#database-config" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Configuration,</a></li>
-             <li><a href="#migrations" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Migrations</a></li>
-        </ul>
+    .docs-sidebar {
+        background: var(--docs-sidebar);
+        border-right: 1px solid #E5E7EB;
+        padding: 2rem 1.5rem;
+        position: sticky;
+        top: 64px;
+        height: calc(100vh - 64px);
+        overflow-y: auto;
+        z-index: 10;
+    }
 
-          <h3 class="font-bold text-gray-900 mb-2 uppercase tracking-wider text-sm flex items-center">
-            <svg class="w-4 h-4 mr-2 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-            Core
-        </h3>
-        <ul class="space-y-1 mb-8 pl-6 border-l border-gray-100">
-             <li><a href="#views" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Templating</a></li>
-            <li><a href="#requests" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Requests & Responses</a></li>
-            <li><a href="#security" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Security</a></li>
-            <li><a href="#helpers" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">Helpers</a></li>
-            <li><a href="#cli" class="text-gray-600 hover:text-blue-600 block py-1 transition-colors">CLI Commands</a></li>
-        </ul>
+    .docs-content {
+        padding: 4rem 5rem;
+        max-width: 1000px;
+        line-height: 1.6;
+        color: var(--docs-text);
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid #E5E7EB;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--docs-primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .nav-group {
+        margin-bottom: 2rem;
+    }
+
+    .nav-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6B7280;
+        margin-bottom: 0.75rem;
+    }
+
+    .nav-link {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        color: #4B5563;
+        font-size: 0.9375rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        margin-bottom: 2px;
+    }
+
+    .nav-link:hover {
+        background: rgba(79, 70, 229, 0.05);
+        color: var(--docs-primary);
+    }
+
+    .nav-link.active {
+        background: rgba(79, 70, 229, 0.1);
+        color: var(--docs-primary);
+        font-weight: 600;
+    }
+
+    .prose h1 { font-size: 3rem; font-weight: 800; color: #111827; margin-bottom: 2rem; letter-spacing: -0.025em; }
+    .prose h2 { font-size: 2rem; font-weight: 700; color: #111827; margin-top: 4rem; margin-bottom: 1.5rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem; }
+    .prose h3 { font-size: 1.5rem; font-weight: 600; color: #111827; margin-top: 2.5rem; margin-bottom: 1rem; }
+    .prose p { margin-bottom: 1.5rem; font-size: 1.125rem; color: #4B5563; }
+
+    .code-block {
+        background: var(--docs-code-bg);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin: 2rem 0;
+        position: relative;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .code-lang-tag {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        color: #6B7280;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .alert {
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin: 2rem 0;
+        display: flex;
+        gap: 1.25rem;
+        line-height: 1.5;
+    }
+
+    .alert-info { background: #EEF2FF; border: 1px solid #C7D2FE; color: #3730A3; }
+    .alert-warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+    .alert-icon { width: 1.5rem; h-height: 1.5rem; flex-shrink: 0; }
+
+    .feature-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid #E5E7EB;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: var(--docs-primary);
+    }
+</style>
+
+<div class="docs-container">
+    <aside class="docs-sidebar custom-scrollbar">
+        <div class="search-box">
+             <svg class="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" placeholder="Quick search..." class="search-input" id="docsSearch">
+        </div>
+
+        <nav id="docsNav">
+            <div class="nav-group">
+                <div class="nav-title">Engine Fundamentals</div>
+                <a href="#introduction" class="nav-link active">Documentation Home</a>
+                <a href="#architecture" class="nav-link">Architecture Deep Dive</a>
+                <a href="#lifecycle" class="nav-link">Request Lifecycle</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Core Systems</div>
+                <a href="#container" class="nav-link">IoC Service Container</a>
+                <a href="#providers" class="nav-link">Service Providers</a>
+                <a href="#config" class="nav-link">Centralized Config</a>
+                <a href="#routing" class="nav-link">Routing & Facades</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Data Architecture</div>
+                <a href="#orm" class="nav-link">Active Record ORM</a>
+                <a href="#migrations" class="nav-link">Migrations & Blueprints</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-title">Staff Engineering</div>
+                <a href="#exceptions" class="nav-link">Exception Management</a>
+                <a href="#observability" class="nav-link">Logging & Monitioring</a>
+                <a href="#security" class="nav-link">Security Protocols</a>
+            </div>
+        </nav>
     </aside>
 
-    <!-- Main Content -->
-    <div class="flex-1 min-w-0">
-        
-        <!-- Introduction -->
-        <section id="introduction" class="mb-20">
-            <h1 class="text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Documentation</h1>
-            <p class="text-xl text-gray-500 leading-relaxed mb-8">
-                Welcome to the official documentation for Med Framework. A highly structured, secure, and fast PHP framework designed to scale with your application.
-            </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100">
-                    <h3 class="font-bold text-blue-900 text-lg mb-2">Modern Architecture</h3>
-                    <p class="text-blue-700">Built on specialized Domain Driven Design principles (Application, Core, Domain, Infrastructure layers).</p>
-                 </div>
-                 <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
-                    <h3 class="font-bold text-purple-900 text-lg mb-2">Zero Dependencies</h3>
-                    <p class="text-purple-700">Core system relies on native PHP 8+ features, ensuring blazing fast performance.</p>
+    <main class="docs-content prose">
+        <section id="introduction">
+            <h1>Engineering Documentation</h1>
+            <p class="text-xl">Welcome to the <strong>Med Framework</strong> ecosystem. This platform is engineered for high-performance enterprise applications, emphasizing strict architectural standards and unparalleled developer experience.</p>
+            
+            <div class="alert alert-info">
+                 <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                 <div>
+                    <strong>Philosophy of Excellence:</strong> We believe in explicit code over implicit magic. Every component is strictly typed, observable, and designed for unit testability.
                  </div>
             </div>
         </section>
 
-        <!-- Installation -->
-        <section id="installation" class="mb-20">
-            <div class="flex items-center mb-6">
-                 <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 mr-4 font-bold">1</div>
-                <h2 class="text-3xl font-bold text-gray-900">Installation</h2>
-            </div>
-          
-            <p class="text-gray-600 mb-6">Start by creating a new project via Composer. This will automatically set up the application structure for you.</p>
+        <section id="architecture">
+            <h2>Architecture Deep Dive</h2>
+            <p>Our architecture utilizes a layered Domain-Driven approach. This ensures that infrastructure concerns are decoupled from high-level business logic.</p>
             
-            <div class="bg-gray-900 rounded-xl overflow-hidden shadow-2xl mb-6">
-                <div class="flex items-center px-4 py-2 bg-gray-800 border-b border-gray-700 space-x-2">
-                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span class="ml-2 text-xs text-gray-400 font-mono">Terminal</span>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-10">
+                <div class="feature-card">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <h3 class="!mt-0 text-lg">Core Layer</h3>
+                    <p class="text-sm text-gray-500">Immutable framework logic. Zero dependencies on external libraries.</p>
                 </div>
-                <pre class="p-6 text-sm text-gray-300 font-mono leading-relaxed">
-<span class="text-green-400">$</span> composer create-project mohammed/php-boilerplate my-app
-<span class="text-green-400">$</span> cd my-app
-<span class="text-green-400">$</span> composer install
-<span class="text-green-400">$</span> cp .env.example .env
-<span class="text-green-400">$</span> php med run key:generate</pre>
-            </div>
-        </section>
-
-        <!-- Structure -->
-        <section id="structure" class="mb-20">
-             <div class="flex items-center mb-6">
-                 <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 mr-4 font-bold">2</div>
-                <h2 class="text-3xl font-bold text-gray-900">Directory Structure</h2>
-            </div>
-            <p class="text-gray-600 mb-6">A clear separation of concerns ensures your codebase remains maintainable.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all">
-                    <code class="text-blue-600 font-bold block mb-2">src/Application</code>
-                    <p class="text-sm text-gray-600">Http entry points: Controllers, Middlewares, Routes, and request handling Services.</p>
+                <div class="feature-card">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                    </div>
+                    <h3 class="!mt-0 text-lg">Domain Layer</h3>
+                    <p class="text-sm text-gray-500">The business heart. Contains Models and rich service logic.</p>
                 </div>
-                <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all">
-                    <code class="text-purple-600 font-bold block mb-2">src/Domain</code>
-                    <p class="text-sm text-gray-600">The business logic heart. Models (Entities) reside here, representing your database tables.</p>
-                </div>
-                <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all">
-                    <code class="text-green-600 font-bold block mb-2">src/Infrastructure</code>
-                    <p class="text-sm text-gray-600">Low-level implementation details like Database connections, Migrations, and file storage.</p>
-                </div>
-                <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all">
-                    <code class="text-pink-600 font-bold block mb-2">src/Core</code>
-                    <p class="text-sm text-gray-600">Framework internal classes. You typically won't need to touch this.</p>
+                <div class="feature-card">
+                    <div class="w-10 h-10 bg-pink-100 text-pink-600 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="!mt-0 text-lg">App Layer</h3>
+                    <p class="text-sm text-gray-500">Entry points: Controllers, Middleware, and API definitions.</p>
                 </div>
             </div>
         </section>
 
-        <hr class="border-gray-200 my-16">
-
-        <!-- Routing -->
-        <section id="routing" class="mb-20">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Routing
-                <a href="#routing" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-            <p class="text-gray-600 mb-6">
-                Routes are the entry point of your application, defined in <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">src/Application/routes/web.php</code>.
-            </p>
-
-            <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Router\Router</span>;
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Application\Controllers\UserController</span>;
-
-<span class="text-gray-500">// 1. Basic Closure Route</span>
-<span class="text-blue-300">Router</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/hello'</span>, <span class="text-purple-400">function</span>() {
-    <span class="text-purple-400">return</span> <span class="text-yellow-300">render</span>(<span class="text-green-300">'hello_world'</span>);
-});
-
-<span class="text-gray-500">// 2. Dynamic Routing</span>
-<span class="text-blue-300">Router</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/user/{id}'</span>, [<span class="text-blue-300">UserController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'show'</span>]);
-
-<span class="text-gray-500">// 3. Middleware Protection</span>
-<span class="text-blue-300">Router</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/dashboard'</span>, [<span class="text-blue-300">DashboardController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'index'</span>])
-      -><span class="text-yellow-300">middleware</span>(<span class="text-green-300">'auth'</span>);</pre>
+        <section id="lifecycle">
+            <h2>Request Lifecycle</h2>
+            <p>Understanding the entry point and execution flow is critical for extending the framework. The lifecycle follows a predictable path from the entry script to the final response.</p>
+            <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-xl my-8">
+                <ol class="space-y-4 text-indigo-900 font-medium">
+                    <li>1. <code class="bg-white px-2 py-0.5 rounded shadow-sm text-indigo-600">index.php</code> serves as the HTTP entry point.</li>
+                    <li>2. <code class="bg-white px-2 py-0.5 rounded shadow-sm text-indigo-600">Bootstrap::run()</code> initializes the core engine.</li>
+                    <li>3. Service Providers are registered and booted into the IoC container.</li>
+                    <li>4. Routes are loaded and matched via the <code class="bg-white px-2 py-0.5 rounded shadow-sm text-indigo-600">Router</code>.</li>
+                    <li>5. Target Controller executes and returns a <code class="bg-white px-2 py-0.5 rounded shadow-sm text-indigo-600">Response</code>.</li>
+                </ol>
             </div>
         </section>
 
-        <!-- Middleware -->
-        <section id="middleware" class="mb-20">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Middleware
-                <a href="#middleware" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-            <p class="text-gray-600 mb-6">
-                Middleware provide a mechanism for inspecting and filtering HTTP requests entering your application.
-            </p>
-
-             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
-<span class="text-purple-400">namespace</span> <span class="text-blue-300">App\Application\Middlewares</span>;
-
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Middleware\MiddlewareInterface</span>;
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Response</span>;
-
-<span class="text-purple-400">class</span> <span class="text-yellow-300">AuthMiddleware</span> <span class="text-purple-400">implements</span> <span class="text-yellow-300">MiddlewareInterface</span>
+        <section id="providers">
+            <h2>Service Providers</h2>
+            <p>Providers are the bootstrap mechanism. They allow you to bind services and perform complex initializations before the request hits the router.</p>
+            <div class="code-block">
+                <div class="code-lang-tag">AppServiceProvider.php</div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-purple-400">public function</span> <span class="text-blue-300">boot</span>(): <span class="text-purple-400">void</span>
 {
-    <span class="text-purple-400">public function</span> <span class="text-blue-300">handle</span>(<span class="text-blue-300">$request</span>, <span class="text-purple-400">callable</span> <span class="text-blue-300">$next</span>)
-    {
-        <span class="text-purple-400">if</span> (!<span class="text-yellow-300">isset</span>(<span class="text-blue-300">$_SESSION</span>[<span class="text-green-300">'user'</span>])) {
-             <span class="text-purple-400">return</span> <span class="text-blue-300">Response</span>::<span class="text-yellow-300">redirect</span>(<span class="text-green-300">'/login'</span>);
-        }
-        
-        <span class="text-purple-400">return</span> <span class="text-blue-300">$next</span>(<span class="text-blue-300">$request</span>);
-    }
+    <span class="text-gray-500">// Bootstrapping logic (e.g., custom configuration)</span>
+    <span class="text-blue-300">View</span>::<span class="text-yellow-300">share</span>(<span class="text-green-300">'app_version'</span>, <span class="text-green-300">'v2.4.0'</span>);
 }</pre>
             </div>
         </section>
 
-        <!-- Controllers -->
-        <section id="controllers" class="mb-20">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Controllers
-                <a href="#controllers" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-            <p class="text-gray-600 mb-6">
-                Controllers handle incoming requests. Create them in <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">src/Application/Controllers</code>.
-            </p>
-
-             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <strong class="text-blue-800">CLI Tip:</strong>
-                <code class="ml-2 bg-white px-2 py-1 rounded border border-blue-200 text-sm font-mono text-gray-700">php med make:controller UserController</code>
+        <section id="config">
+            <h2>Centralized Configuration</h2>
+            <p>Manage application settings via strictly typed PHP arrays in the <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-indigo-600 font-mono">config/*.php</code> directory.</p>
+            <div class="code-block">
+                <div class="code-lang-tag">Usage</div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-gray-500">// Accessible anywhere via the helper</span>
+<span class="text-purple-400">$dbHost</span> = <span class="text-yellow-300">config</span>(<span class="text-green-300">'database.connections.mysql.host'</span>);</pre>
             </div>
+        </section>
 
-            <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
-<span class="text-purple-400">namespace</span> <span class="text-blue-300">App\Application\Controllers</span>;
+        <section id="routing">
+            <h2>Routing & Facades</h2>
+            <p>Defining entry points is expressive and clean. Facades provide a static proxy to underlying container services.</p>
+            <div class="code-block">
+                <div class="code-lang-tag">web.php</div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-blue-300">Route</span>::<span class="text-yellow-300">get</span>(<span class="text-green-300">'/api/user/{id}'</span>, [<span class="text-blue-300">UserController</span>::<span class="text-purple-400">class</span>, <span class="text-green-300">'show'</span>])
+      -><span class="text-yellow-300">middleware</span>(<span class="text-green-300">'auth:api'</span>);</pre>
+            </div>
+        </section>
 
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Request</span>;
+        <section id="orm">
+            <h2>Active Record ORM</h2>
+            <p>Our ORM provides an expressive query builder while maintaining a small memory footprint. Every model interaction is strictly typed and protected against SQL injection.</p>
+            
+            <div class="code-block">
+                <div class="code-header"><button class="copy-btn">Copy</button></div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-gray-500">// Fluent, readable, and staff-grade</span>
+<span class="text-blue-300">User</span>::<span class="text-yellow-300">where</span>(<span class="text-green-300">'email'</span>, <span class="text-blue-300">$email</span>)
+    -><span class="text-yellow-300">orderBy</span>(<span class="text-green-300">'created_at'</span>, <span class="text-green-300">'DESC'</span>)
+    -><span class="text-yellow-300">first</span>();</pre>
+            </div>
+        </section>
 
-<span class="text-purple-400">class</span> <span class="text-yellow-300">UserController</span> 
-{
-    <span class="text-purple-400">public function</span> <span class="text-blue-300">index</span>()
-    {
-        <span class="text-purple-400">return</span> <span class="text-yellow-300">view</span>(<span class="text-green-300">'users.index'</span>, [<span class="text-green-300">'users'</span> => []]);
-    }
+        <section id="migrations">
+            <h2>Migrations & Blueprints</h2>
+            <p>Version control for your database. We use a fluent builder to define schema changes programmatically.</p>
+            <div class="code-block">
+                <div class="code-lang-tag">Migration Example</div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-blue-300">Schema</span>::<span class="text-yellow-300">create</span>(<span class="text-green-300">'vouchers'</span>, <span class="text-purple-400">function</span> (<span class="text-blue-300">Blueprint $table</span>) {
+    <span class="text-blue-300">$table</span>-><span class="text-yellow-300">id</span>();
+    <span class="text-blue-300">$table</span>-><span class="text-yellow-300">string</span>(<span class="text-green-300">'code'</span>)-><span class="text-yellow-300">unique</span>();
+    <span class="text-blue-300">$table</span>-><span class="text-yellow-300">decimal</span>(<span class="text-green-300">'discount'</span>, 8, 2);
+    <span class="text-blue-300">$table</span>-><span class="text-yellow-300">timestamps</span>();
+});</pre>
+            </div>
+        </section>
 
-    <span class="text-purple-400">public function</span> <span class="text-blue-300">store</span>()
-    {
-        <span class="text-purple-400">$name</span> = <span class="text-blue-300">Request</span>::<span class="text-yellow-300">input</span>(<span class="text-green-300">'name'</span>);
-        <span class="text-gray-500">// Save logic...</span>
-    }
+        <section id="exceptions">
+            <h2>Exception Management</h2>
+            <p>Our centralized error handling ensures that no crash goes unlogged. Use the custom hierarchy to provide context-aware failures.</p>
+            
+            <div class="code-block">
+                <div class="code-lang-tag">Exception Hierarchy</div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-purple-400">try</span> {
+    <span class="text-gray-500">// Business logic</span>
+} <span class="text-purple-400">catch</span> (<span class="text-blue-300">ConfigurationException $e</span>) {
+    <span class="text-blue-300">Log</span>::<span class="text-yellow-300">error</span>(<span class="text-blue-300">$e</span>-><span class="text-yellow-300">getMessage</span>());
 }</pre>
             </div>
-        </section>
 
-         <!-- Views -->
-        <section id="views" class="mb-20">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Templating (Blade)
-                <a href="#views" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-             <p class="text-gray-600 mb-6">
-                Med Framework includes a powerful Blade-compatible engine. Files must use the <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">.med.php</code> extension.
-            </p>
-
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Master Layout</h3>
-             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                 <div class="flex items-center px-4 py-2 bg-gray-900 border-b border-gray-700">
-                    <span class="text-xs text-gray-400">views/layouts/master.med.php</span>
-                </div>
-                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
-&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;body&gt;
-    <span class="text-purple-400">&#64;include</span>(<span class="text-green-300">'partials/nav'</span>)
-    
-    &lt;div class="container"&gt;
-        <span class="text-purple-400">&#64;yield</span>(<span class="text-green-300">'content'</span>)
-    &lt;/div&gt;
-
-    &lt;script src="&amp;#123;&amp;#123; <span class="text-yellow-300">asset</span>(<span class="text-green-300">'js/app.js'</span>) &amp;#125;&amp;#125;"&gt;&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;</pre>
-            </div>
-
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Child Page</h3>
-            <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                 <div class="flex items-center px-4 py-2 bg-gray-900 border-b border-gray-700">
-                    <span class="text-xs text-gray-400">views/home.med.php</span>
-                </div>
-                 <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
-<span class="text-purple-400">&#64;extends</span>(<span class="text-green-300">'layouts/master'</span>)
-
-<span class="text-purple-400">&#64;section</span>(<span class="text-green-300">'content'</span>)
-    &lt;h1&gt;Welcome, &amp;#123;&amp;#123; <span class="text-blue-300">$user</span> &amp;#125;&amp;#125;!&lt;/h1&gt;
-    
-    <span class="text-purple-400">&#64;if</span>(<span class="text-blue-300">$isAdmin</span>)
-        &lt;button&gt;Admin Panel&lt;/button&gt;
-    <span class="text-purple-400">&#64;endif</span>
-<span class="text-purple-400">&#64;endsection</span></pre>
+            <div class="alert alert-warning">
+                 <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                 <div>
+                    <strong>Staff Engineering Note:</strong> Centralized catch blocks in <code>Bootstrap::run()</code> guarantee that production users never see a raw stack trace.
+                 </div>
             </div>
         </section>
 
-        <!-- Requests -->
-        <section id="requests" class="mb-20">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Requests & Responses
-                <a href="#requests" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-            <p class="text-gray-600 mb-6">
-                Interact with HTTP flow using the static <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">Request</code> and <code class="bg-gray-100 px-1 py-0.5 rounded text-sm text-pink-600 font-mono">Response</code> classes.
-            </p>
-             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Request</span>;
-<span class="text-purple-400">use</span> <span class="text-blue-300">App\Core\Http\Response</span>;
-
-<span class="text-purple-400">$data</span> = <span class="text-blue-300">Request</span>::<span class="text-yellow-300">all</span>();
-<span class="text-purple-400">$input</span> = <span class="text-blue-300">Request</span>::<span class="text-yellow-300">input</span>(<span class="text-green-300">'key'</span>, <span class="text-green-300">'default'</span>);
-
-<span class="text-gray-500">// Return JSON</span>
-<span class="text-blue-300">Response</span>::<span class="text-yellow-300">json</span>([<span class="text-green-300">'status'</span> => <span class="text-green-300">'ok'</span>]);</pre>
-            </div>
-        </section>
-
-        <!-- Security -->
-        <section id="security" class="mb-20">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Security
-                <a href="#security" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-            <p class="text-gray-600 mb-6">
-                Protect your application against common vulnerabilities.
-            </p>
+        <section id="observability">
+            <h2>Logging & Observability</h2>
+            <p>Every framework event can be recorded with structured context. This is essential for post-mortem analysis in staff-level deployments.</p>
             
-            <h3 class="text-xl font-bold text-gray-900 mb-4">CSRF Protection</h3>
-            <p class="text-gray-600 mb-4">Use the <code>&#64;CSRF</code> directive in your forms to generate a hidden token field.</p>
-             <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-6 shadow-md">
-                <pre class="p-6 overflow-x-auto text-sm text-blue-100 font-mono">
-&lt;form method="POST" action="/update"&gt;
-    <span class="text-purple-400">&#64;CSRF</span>
-    &lt;input type="text" name="data" /&gt;
-    &lt;button&gt;Submit&lt;/button&gt;
-&lt;/form&gt;</pre>
+            <div class="code-block">
+                <div class="code-lang-tag">Log Facade</div>
+                <pre class="text-gray-300 font-mono text-sm leading-relaxed">
+<span class="text-blue-300">Log</span>::<span class="text-yellow-300">info</span>(<span class="text-green-300">'User Login Attempt'</span>, [
+    <span class="text-green-300">'ip'</span> => <span class="text-blue-300">$request</span>-><span class="text-yellow-300">ip</span>(),
+    <span class="text-green-300">'email'</span> => <span class="text-blue-300">$email</span>
+]);</pre>
             </div>
         </section>
 
-        <!-- Helpers -->
-        <section id="helpers" class="mb-20">
-             <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                Helpers
-                <a href="#helpers" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <code class="text-purple-600 font-bold">view($name, $data)</code>
-                    <p class="text-sm text-gray-600 mt-1">Render a Blade view.</p>
-                 </div>
-                 <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <code class="text-purple-600 font-bold">csrf_token()</code>
-                    <p class="text-sm text-gray-600 mt-1">Get the current CSRF token string.</p>
-                 </div>
-                  <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <code class="text-purple-600 font-bold">dd($var)</code>
-                    <p class="text-sm text-gray-600 mt-1">Dump and die for debugging.</p>
-                 </div>
+        <section id="security">
+            <h2>Security Protocols</h2>
+            <p>Hardened by default. We implement CSRF protection, secure session management, and automated SQL injection mitigation via PDO prepared statements.</p>
+            <div class="bg-red-50 border border-red-100 p-6 rounded-xl my-8">
+                <h4 class="text-red-900 font-bold mb-2 uppercase text-xs tracking-widest">Security Checklist</h4>
+                <ul class="text-red-800 space-y-2 text-sm font-medium">
+                    <li>&check; Use <code>@CSRF</code> on all POST forms.</li>
+                    <li>&check; Set <code>APP_DEBUG=false</code> in production.</li>
+                    <li>&check; Sanitize all user-input displays via <code>&lcub;&lcub; &rcub;&rcub;</code>.</li>
+                </ul>
             </div>
         </section>
 
-        <!-- CLI -->
-        <section id="cli" class="mb-20">
-             <h2 class="text-3xl font-bold text-gray-900 mb-6 group flex items-center">
-                CLI Commands
-                <a href="#cli" class="opacity-0 group-hover:opacity-100 ml-2 text-blue-500 transition-opacity">#</a>
-            </h2>
-            <p class="text-gray-600 mb-6">
-                Automate your workflow with the built-in <code class="bg-gray-900 px-2 py-0.5 rounded text-sm text-white font-mono">med</code> CLI tool.
-            </p>
-
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg mb-8">
-                <table class="min-w-full divide-y divide-gray-300">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Command</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Description</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                         <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med serve</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Starts the local development server.</td>
-                        </tr>
-                        <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:controller</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Create a new Controller in Application layer.</td>
-                        </tr>
-                        <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:model</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Create a new Model in Domain layer.</td>
-                        </tr>
-                        <tr>
-                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:migration</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Create a new database migration file.</td>
-                        </tr>
-                         <tr>
-                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med key:generate</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Generate the application security key.</td>
-                        </tr>
-                         <tr>
-                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:service</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Create a new Service class.</td>
-                        </tr>
-                         <tr>
-                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med make:repository</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Create a new Repository class.</td>
-                        </tr>
-                         <tr>
-                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-purple-600 sm:pl-6">php med migrate</td>
-                            <td class="px-3 py-4 text-sm text-gray-500">Run pending database migrations.</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <footer class="mt-24 py-10 border-t border-gray-200">
+            <div class="flex justify-between items-center text-gray-400 text-sm">
+                <div>Framework Version 10.4.2 (LRT)</div>
+                <div>&copy; 2026 Engineering Org. All rights reserved.</div>
             </div>
-        </section>
-
-    </div>
+        </footer>
+    </main>
 </div>
+
+<script>
+    // Search logic with highlighting
+    const docsSearch = document.getElementById('docsSearch');
+    docsSearch.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const links = document.querySelectorAll('.nav-link');
+        
+        links.forEach(link => {
+            const match = link.textContent.toLowerCase().includes(query);
+            link.style.display = match ? 'block' : 'none';
+        });
+    });
+
+    // Intersection Observer for scroll-spy effect
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('section[id]').forEach((section) => {
+        observer.observe(section);
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-link').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+                
+                // Update active state immediately
+                document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update URL without jump
+                history.pushState(null, null, '#' + targetId);
+            }
+        });
+    });
+</script>
 @endsection
