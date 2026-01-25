@@ -36,7 +36,7 @@ A lightweight, high-performance PHP MVC framework designed for rapid development
 Create a new project using Composer:
 
 ```bash
-composer create-project mohammed/php-boilerplate my-app
+composer create-project mohammed/php-boilerplate:dev-main my-app
 cd my-app
 ```
 
@@ -65,6 +65,13 @@ The framework comes with a powerful CLI tool:
 | `php med key:generate` | Generate the application security key |
 | `php med make:module Shop` | Creates a new self-contained module |
 | `php med make:controller User` | Creates `UserController.php` |
+| `php med make:model User` | Creates `User.php` Domain Model |
+| `php med make:service User` | Creates `UserService.php` |
+| `php med make:repository User` | Creates `UserRepository.php` |
+| `php med make:migration create_users_table` | Creates a new migration file |
+| `php med migrate` | Runs pending migrations |
+| `php med serve` | Start the development server |
+` |
 | `php med make:model User` | Creates `User.php` Domain Model |
 | `php med make:service User` | Creates `UserService.php` |
 | `php med make:repository User` | Creates `UserRepository.php` |
