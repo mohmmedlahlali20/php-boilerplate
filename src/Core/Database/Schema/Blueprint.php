@@ -57,6 +57,28 @@ class Blueprint
     }
 
     /**
+     * Define a boolean column (stored as TINYINT).
+     * @param string $name
+     * @return $this
+     */
+    public function boolean($name)
+    {
+        $this->columns[] = "$name TINYINT(1) NOT NULL";
+        return $this;
+    }
+
+    /**
+     * Define a foreign key column.
+     * @param string $name
+     * @return $this
+     */
+    public function foreignId($name)
+    {
+        $this->columns[] = "$name INT NOT NULL";
+        return $this;
+    }
+
+    /**
      * Allow the last defined column to accept NULL values.
      * @return $this
      */
@@ -80,6 +102,19 @@ class Blueprint
         if ($lastIndex >= 0) {
             $formattedValue = is_string($value) ? "'$value'" : $value;
             $this->columns[$lastIndex] .= " DEFAULT $formattedValue";
+        }
+        return $this;
+    }
+
+    /**
+     * Set the last defined column as unique.
+     * @return $this
+     */
+    public function unique()
+    {
+        $lastIndex = count($this->columns) - 1;
+        if ($lastIndex >= 0) {
+            $this->columns[$lastIndex] .= " UNIQUE";
         }
         return $this;
     }
