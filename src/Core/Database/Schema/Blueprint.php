@@ -9,8 +9,11 @@ namespace App\Core\Database\Schema;
  */
 class Blueprint
 {
-    /** @var array Holds the SQL string fragments for each column */
     private array $columns = [];
+    private array $commands = [];
+    private string $engine = 'InnoDB';
+    private string $charset = 'utf8mb4';
+    private string $collation = 'utf8mb4_unicode_ci';
 
     /**
      * Define an auto-incrementing integer primary key.
@@ -18,8 +21,7 @@ class Blueprint
      */
     public function id()
     {
-        $this->columns[] = "id INT AUTO_INCREMENT PRIMARY KEY";
-        return $this;
+        return $this->integer('id')->autoIncrement()->primary();
     }
 
     /**
@@ -30,122 +32,279 @@ class Blueprint
      */
     public function string($name, $length = 255)
     {
-        $this->columns[] = "$name VARCHAR($length) NOT NULL";
+        $this->columns[] = [
+            'type' => 'VARCHAR',
+            'name' => $name,
+            'length' => $length,
+            'nullable' => false,
+            'default' => null,
+            'unique' => false,
+            'primary' => false,
+            'auto_increment' => false,
+            'unsigned' => false
+        ];
         return $this;
     }
 
     /**
      * Define a long text column.
-     * @param string $name
-     * @return $this
      */
     public function text($name)
     {
-        $this->columns[] = "$name TEXT NOT NULL";
+        $this->columns[] = [
+            'type' => 'TEXT',
+            'name' => $name,
+            'nullable' => false
+        ];
         return $this;
     }
 
     /**
      * Define an integer column.
-     * @param string $name
-     * @return $this
      */
     public function integer($name)
     {
-        $this->columns[] = "$name INT NOT NULL";
+        $this->columns[] = [
+            'type' => 'INT',
+            'name' => $name,
+            'nullable' => false,
+            'unsigned' => false,
+            'auto_increment' => false
+        ];
         return $this;
     }
 
     /**
-     * Define a boolean column (stored as TINYINT).
-     * @param string $name
-     * @return $this
+     * Define a big integer column.
+     */
+    public function bigInteger($name)
+    {
+        $this->columns[] = [
+            'type' => 'BIGINT',
+            'name' => $name,
+            'nullable' => false,
+            'unsigned' => false
+        ];
+        return $this;
+    }
+
+    /**
+     * Define a boolean column.
      */
     public function boolean($name)
     {
-        $this->columns[] = "$name TINYINT(1) NOT NULL";
+        $this->columns[] = [
+            'type' => 'TINYINT',
+            'name' => $name,
+            'length' => 1,
+            'nullable' => false
+        ];
+        return $this;
+    }
+
+    /**
+     * Define an enum column.
+     */
+    public function enum($name, array $allowed)
+    {
+        $values = "'" . implode("', '", $allowed) . "'";
+        $this->columns[] = [
+            'type' => "ENUM($values)",
+            'name' => $name,
+            'nullable' => false
+        ];
+        return $this;
+    }
+
+    /**
+     * Define a decimal column.
+     */
+    public function decimal($name, $precision = 8, $scale = 2)
+    {
+        $this->columns[] = [
+            'type' => "DECIMAL($precision, $scale)",
+            'name' => $name,
+            'nullable' => false
+        ];
+        return $this;
+    }
+
+    /**
+     * Define a timestamp column.
+     */
+    public function timestamp($name)
+    {
+        $this->columns[] = [
+            'type' => 'TIMESTAMP',
+            'name' => $name,
+            'nullable' => true
+        ];
+        return $this;
+    }
+
+    /**
+     * Define a date column.
+     */
+    public function date($name)
+    {
+        $this->columns[] = [
+            'type' => 'DATE',
+            'name' => $name,
+            'nullable' => false
+        ];
+        return $this;
+    }
+
+    /**
+     * Add 'created_at' and 'updated_at' columns.
+     */
+    public function timestamps()
+    {
+        $this->columns[] = [
+            'type' => 'TIMESTAMP',
+            'name' => 'created_at',
+            'default' => 'CURRENT_TIMESTAMP',
+            'nullable' => true
+        ];
+        $this->columns[] = [
+            'type' => 'TIMESTAMP',
+            'name' => 'updated_at',
+            'default' => 'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            'nullable' => true
+        ];
+        return $this;
+    }
+
+    /**
+     * Add 'deleted_at' for soft deletes.
+     */
+    public function softDeletes()
+    {
+        $this->columns[] = [
+            'type' => 'TIMESTAMP',
+            'name' => 'deleted_at',
+            'nullable' => true
+        ];
         return $this;
     }
 
     /**
      * Define a foreign key column.
-     * @param string $name
-     * @return $this
      */
     public function foreignId($name)
     {
-        $this->columns[] = "$name INT NOT NULL";
-        return $this;
+        return $this->bigInteger($name)->unsigned();
     }
 
-    /**
-     * Allow the last defined column to accept NULL values.
-     * @return $this
-     */
+    // --- Modifiers ---
+
     public function nullable()
     {
-        $lastIndex = count($this->columns) - 1;
-        if ($lastIndex >= 0) {
-            $this->columns[$lastIndex] = str_replace("NOT NULL", "NULL", $this->columns[$lastIndex]);
-        }
+        $this->lastColumn()['nullable'] = true;
         return $this;
     }
 
-    /**
-     * Set a default value for the last defined column.
-     * @param mixed $value
-     * @return $this
-     */
     public function default($value)
     {
-        $lastIndex = count($this->columns) - 1;
-        if ($lastIndex >= 0) {
-            $formattedValue = is_string($value) ? "'$value'" : $value;
-            $this->columns[$lastIndex] .= " DEFAULT $formattedValue";
-        }
+        $this->lastColumn()['default'] = $value;
         return $this;
     }
 
-    /**
-     * Set the last defined column as unique.
-     * @return $this
-     */
+    public function unsigned()
+    {
+        $this->lastColumn()['unsigned'] = true;
+        return $this;
+    }
+
     public function unique()
     {
-        $lastIndex = count($this->columns) - 1;
-        if ($lastIndex >= 0) {
-            $this->columns[$lastIndex] .= " UNIQUE";
+        $this->lastColumn()['unique'] = true;
+        return $this;
+    }
+
+    public function primary()
+    {
+        $this->lastColumn()['primary'] = true;
+        return $this;
+    }
+
+    public function autoIncrement()
+    {
+        $this->lastColumn()['auto_increment'] = true;
+        return $this;
+    }
+
+    /**
+     * Define a foreign key constraint.
+     */
+    public function constrained($table, $column = 'id')
+    {
+        $lastCol = $this->lastColumn();
+        $this->commands[] = [
+            'type' => 'foreign',
+            'column' => $lastCol['name'],
+            'references' => $column,
+            'on' => $table
+        ];
+        return $this;
+    }
+
+    public function onDelete($action)
+    {
+        $lastCommand = &$this->commands[count($this->commands) - 1];
+        if ($lastCommand['type'] === 'foreign') {
+            $lastCommand['on_delete'] = $action;
         }
         return $this;
     }
 
-    /**
-     * Add a 'deleted_at' timestamp for soft delete functionality.
-     * @return $this
-     */
-    public function softDeletes()
+    private function &lastColumn()
     {
-        $this->columns[] = "deleted_at TIMESTAMP NULL DEFAULT NULL";
-        return $this;
+        return $this->columns[count($this->columns) - 1];
     }
 
     /**
-     * Add 'created_at' and 'updated_at' timestamp columns.
-     * @return $this
+     * Compile the SQL for creating the table.
      */
-    public function timestamps()
+    public function getSql($table)
     {
-        $this->columns[] = "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-        $this->columns[] = "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
-        return $this;
-    }
+        $sqlParts = [];
+        $constraints = [];
 
-    /**
-     * Compile the column definitions into a single SQL string fragment.
-     * @return string
-     */
-    public function getSql()
-    {
-        return implode(", ", $this->columns);
+        foreach ($this->columns as $col) {
+            $part = "`{$col['name']}` {$col['type']}";
+            
+            if (isset($col['length'])) {
+                $part = "`{$col['name']}` {$col['type']}({$col['length']})";
+            }
+
+            if (($col['unsigned'] ?? false)) $part .= " UNSIGNED";
+            if (!($col['nullable'] ?? false)) $part .= " NOT NULL";
+            
+            if (isset($col['default'])) {
+                $val = is_string($col['default']) && strpos($col['default'], 'CURRENT_TIMESTAMP') === false 
+                        ? "'{$col['default']}'" 
+                        : $col['default'];
+                $part .= " DEFAULT $val";
+            }
+
+            if (($col['auto_increment'] ?? false)) $part .= " AUTO_INCREMENT";
+            if (($col['primary'] ?? false)) $constraints[] = "PRIMARY KEY (`{$col['name']}`)";
+            if (($col['unique'] ?? false)) $constraints[] = "UNIQUE KEY `{$table}_{$col['name']}_unique` (`{$col['name']}`)";
+
+            $sqlParts[] = $part;
+        }
+
+        foreach ($this->commands as $cmd) {
+            if ($cmd['type'] === 'foreign') {
+                $onDelete = isset($cmd['on_delete']) ? " ON DELETE {$cmd['on_delete']}" : "";
+                $constraints[] = "CONSTRAINT `{$table}_{$cmd['column']}_foreign` 
+                                  FOREIGN KEY (`{$cmd['column']}`) 
+                                  REFERENCES `{$cmd['on']}`(`{$cmd['references']}`)$onDelete";
+            }
+        }
+
+        $allParts = array_merge($sqlParts, $constraints);
+        return implode(", ", $allParts);
     }
 }
