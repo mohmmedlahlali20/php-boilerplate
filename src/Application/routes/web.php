@@ -22,8 +22,7 @@ Router::get('/security-test', [SecurityTestController::class, 'index']);
 Router::post('/security-test/unsafe', [SecurityTestController::class, 'handleUnsafe']);
 
 // Safe Route: Protected by CSRF middleware
-Router::post('/security-test/safe', [SecurityTestController::class, 'handleSafe'])
-      ->middleware('csrf');
+Router::post('/security-test/safe', [SecurityTestController::class, 'handleSafe']);
 
 // Admin Route: Protected by Auth middleware
 Router::get('/admin', function() {
