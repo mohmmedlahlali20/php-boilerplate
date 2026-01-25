@@ -3,10 +3,11 @@
 namespace App\Application\Controllers;
 
 use App\Core\Bootstrap\Bootstrap;
+use App\Core\Security\Csrf;
 
 /**
  * Class Controller
- * * Base controller providing view rendering, redirection, and CSRF security.
+ * Base controller providing view rendering, redirection, and CSRF security.
  */
 abstract class Controller
 {
@@ -14,23 +15,12 @@ abstract class Controller
     protected static $viewEngine = null;
 
     /**
-     * Controller constructor.
-     * Automatically validates CSRF tokens for all POST requests.
-     */
-    public function __construct()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->validateCsrf();
-        }
-    }
-
-    /**
      * Renders a template view with the provided data.
-     * * @param string $view
+     * @param string $view
      * @param array $data
-     * @return void
+     * @return string The rendered HTML
      */
-    protected function render(string $view, array $data = []): void
+    protected function render(string $view, array $data = []): string
     {
         if (self::$viewEngine === null) {
             self::$viewEngine = Bootstrap::initView();
@@ -39,12 +29,12 @@ abstract class Controller
         // Always inject the current CSRF token into every view for convenience
         $data['csrf_token'] = $this->generateCsrfToken();
 
-        echo self::$viewEngine->render($view, $data);
+        return self::$viewEngine->render($view, $data);
     }
 
     /**
      * Redirects to a specific URL.
-     * * @param string $url
+     * @param string $url
      * @return void
      */
     protected function redirect(string $url): void
@@ -55,7 +45,7 @@ abstract class Controller
 
     /**
      * Returns a JSON response.
-     * * @param mixed $data
+     * @param mixed $data
      * @param int $status
      * @return void
      */
@@ -68,33 +58,23 @@ abstract class Controller
     }
 
     /**
-     * Generates and retrieves the CSRF token from the session.
-     * * @return string
+     * Generates and retrieves the CSRF token.
+     * @return string
      */
     protected function generateCsrfToken(): string
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-        return $_SESSION['csrf_token'];
+        return Csrf::generate();
     }
 
     /**
-     * Validates the CSRF token from the POST request.
-     * * @throws \Exception If the token is invalid or missing.
+     * Validates the CSRF token from the request.
+     * @throws \Exception If the token is invalid or missing.
      */
     protected function validateCsrf(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 
-        $token = $_POST['csrf_token'] ?? '';
-
-        if (empty($token) || $token !== ($_SESSION['csrf_token'] ?? '')) {
+        if (!Csrf::validate($token)) {
             http_response_code(403);
             die("Security Error: Invalid or missing CSRF token.");
         }
