@@ -4,43 +4,61 @@ namespace App\Core\Http;
 
 /**
  * Class Response
- * Handles sending HTTP responses including headers, status codes, and content.
+ * Represents an HTTP response with a Laravel-inspired API.
  */
 class Response
 {
-    /**
-     * Send a JSON response to the client.
-     * Useful for API development within OptimaCV.
-     * * @param mixed $data The data to be encoded as JSON.
-     * @param int $statusCode The HTTP status code (default: 200).
-     */
-    public static function json($data, int $statusCode = 200)
+    protected $content;
+    protected int $status;
+    protected array $headers;
+
+    public function __construct($content = '', int $status = 200, array $headers = [])
     {
-        header('Content-Type: application/json');
-        http_response_code($statusCode);
-        echo json_encode($data);
-        exit;
+        $this->content = $content;
+        $this->status = $status;
+        $this->headers = $headers;
     }
 
-    /**
-     * Redirect the user to a specific URL.
-     * * @param string $url The destination URL.
-     */
-    public static function redirect(string $url)
+    public function setStatus(int $status): self
     {
-        header("Location: $url");
-        exit;
+        $this->status = $status;
+        return $this;
     }
 
-    /**
-     * Send a plain text or HTML response.
-     * * @param string $content The content to display.
-     * @param int $statusCode The HTTP status code (default: 200).
-     */
-    public static function send(string $content, int $statusCode = 200)
+    public function header(string $key, string $value): self
     {
-        http_response_code($statusCode);
-        echo $content;
-        exit;
+        $this->headers[$key] = $value;
+        return $this;
+    }
+
+    public function withHeaders(array $headers): self
+    {
+        $this->headers = array_merge($this->headers, $headers);
+        return $this;
+    }
+
+    public function json($data, int $status = 200): self
+    {
+        $this->content = json_encode($data);
+        $this->status = $status;
+        $this->header('Content-Type', 'application/json');
+        return $this;
+    }
+
+    public function send(): void
+    {
+        if (!headers_sent()) {
+            http_response_code($this->status);
+            foreach ($this->headers as $key => $value) {
+                header("$key: $value");
+            }
+        }
+
+        echo $this->content;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->content;
     }
 }

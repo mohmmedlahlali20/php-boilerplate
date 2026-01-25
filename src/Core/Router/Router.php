@@ -82,16 +82,10 @@ class Router
 
     public static function resolve()
     {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
-        
-        // --- Method Spoofing ---
-        $method = strtolower($_SERVER['REQUEST_METHOD']);
-        if ($method === 'post' && isset($_POST['_method'])) {
-            $spoofed = strtolower($_POST['_method']);
-            if (in_array($spoofed, ['put', 'patch', 'delete'])) {
-                $method = $spoofed;
-            }
-        }
+        $container = Container::getInstance();
+        $request = $container->get(Request::class);
+        $uri = $request->uri();
+        $method = strtolower($request->method());
 
         // --- Iteration & Matching ---
         foreach (self::$routes as $route) {
@@ -100,33 +94,24 @@ class Router
             }
 
             if (preg_match($route['pattern'], $uri, $matches)) {
-                // Remove numeric keys from regex match
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
                 // --- Middleware Execution ---
                 $kernel = new \App\Core\Http\Kernel();
                 $globalMiddleware = $kernel->getGlobalMiddleware();
                 
-                // Resolve route middlewares aliases to class names
                 $routeMiddleware = array_map(function($alias) use ($kernel) {
                     return $kernel->getRouteMiddleware($alias);
                 }, $route['middlewares']);
                 
-                // Filter out nulls (invalid aliases)
-                $routeMiddleware = array_filter($routeMiddleware);
-
-                $allMiddleware = array_merge($globalMiddleware, $routeMiddleware);
+                $allMiddleware = array_merge($globalMiddleware, array_filter($routeMiddleware));
 
                 // --- Pipeline Execution ---
-                // We pass the parameters as the "request" payload for now, 
-                // but ideally we should pass a Request object.
-                // For simplicity in this step, we'll pass the params array.
-                
                 return (new \App\Core\Http\Pipeline())
-                    ->send($params) 
+                    ->send($request) 
                     ->through($allMiddleware)
-                    ->then(function ($params) use ($route) {
-                        return self::executeAction($route['callback'], $params);
+                    ->then(function ($request) use ($route, $params) {
+                        return self::executeAction($route['callback'], $request, $params);
                     });
             }
         }
@@ -136,12 +121,12 @@ class Router
         echo render('errors/404', ['title' => 'Page Not Found']);
     }
 
-    protected static function executeAction($callback, $params)
+    protected static function executeAction($callback, $request, $params)
     {
         // 1. Closure
         if (is_callable($callback)) {
-            echo call_user_func_array($callback, $params);
-            return;
+            $result = call_user_func_array($callback, array_merge([$request], $params));
+            return self::handleResult($result);
         }
 
         // 2. Controller Array: [Controller::class, 'method']
@@ -159,11 +144,24 @@ class Router
                 throw new \Exception("Method $method not found in controller $class");
             }
 
-            $result = call_user_func_array([$controller, $method], $params);
-            
-            if (is_string($result)) {
-                echo $result;
-            }
+            $result = call_user_func_array([$controller, $method], array_merge([$request], $params));
+            return self::handleResult($result);
+        }
+    }
+
+    protected static function handleResult($result)
+    {
+        if ($result instanceof Response) {
+            return $result->send();
+        }
+
+        if (is_string($result)) {
+            echo $result;
+        }
+
+        if (is_array($result) || is_object($result)) {
+            header('Content-Type: application/json');
+            echo json_encode($result);
         }
     }
 }

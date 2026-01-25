@@ -123,3 +123,12 @@ if (!function_exists('csrf_token')) {
         return \App\Core\Security\Csrf::generate();
     }
 }
+if (!function_exists('config')) {
+    /**
+     * Get a configuration value.
+     */
+    function config(string $key, $default = null)
+    {
+        return \App\Core\Config\Config::get($key, $default);
+    }
+}

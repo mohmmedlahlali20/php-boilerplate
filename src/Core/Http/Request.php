@@ -4,67 +4,103 @@ namespace App\Core\Http;
 
 /**
  * Class Request
- * Provides a clean interface for interacting with the current HTTP request.
+ * Represents the current HTTP request with a Laravel-inspired API.
  */
 class Request
 {
-    /**
-     * Get the current request URI path.
-     * @return string
-     */
-    public static function uri(): string
+    protected array $data;
+    protected array $server;
+    protected array $files;
+    protected array $cookies;
+    protected array $headers;
+
+    public function __construct()
     {
-        return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $this->server = $_SERVER;
+        $this->files = $_FILES;
+        $this->cookies = $_COOKIE;
+        $this->headers = $this->extractHeaders();
+        $this->data = $this->extractData();
     }
 
-    /**
-     * Get the HTTP request method (GET, POST, etc.).
-     * @return string
-     */
-    public static function method(): string
+    protected function extractHeaders(): array
     {
-        return $_SERVER['REQUEST_METHOD'];
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+            if (str_starts_with($key, 'HTTP_')) {
+                $name = str_replace('_', '-', strtolower(substr($key, 5)));
+                $headers[$name] = $value;
+            }
+        }
+        return $headers;
     }
 
-    /**
-     * Get all input data from GET and POST requests.
-     * Useful for handling form submissions in OptimaCV.
-     * @return array
-     */
-    public static function all(): array
+    protected function extractData(): array
     {
-        return array_merge($_GET, $_POST, json_decode(file_get_contents('php://input'), true) ?? []);
+        return array_merge(
+            $_GET, 
+            $_POST, 
+            json_decode(file_get_contents('php://input'), true) ?? []
+        );
     }
 
-    /**
-     * Get a specific input value by key.
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public static function input(string $key, $default = null)
+    public function all(): array
     {
-        $data = self::all();
-        return $data[$key] ?? $default;
+        return $this->data;
     }
 
-    /**
-     * Check if the request is an AJAX request.
-     * @return bool
-     */
-    public static function isAjax(): bool
+    public function input(string $key, $default = null)
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+        return $this->data[$key] ?? $default;
     }
 
-    /**
-     * Retrieve a specific header value.
-     * @param string $key
-     * @return string|null
-     */
-    public static function header(string $key): ?string
+    public function only(array $keys): array
     {
-        $headers = getallheaders();
-        return $headers[$key] ?? $headers[ucfirst($key)] ?? null;
+        return array_intersect_key($this->data, array_flip($keys));
+    }
+
+    public function except(array $keys): array
+    {
+        return array_diff_key($this->data, array_flip($keys));
+    }
+
+    public function has(string $key): bool
+    {
+        return isset($this->data[$key]);
+    }
+
+    public function method(): string
+    {
+        return strtoupper($this->server['REQUEST_METHOD'] ?? 'GET');
+    }
+
+    public function uri(): string
+    {
+        return parse_url($this->server['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    }
+
+    public function isMethod(string $method): bool
+    {
+        return $this->method() === strtoupper($method);
+    }
+
+    public function header(string $key, $default = null)
+    {
+        return $this->headers[strtolower($key)] ?? $default;
+    }
+
+    public function ip(): ?string
+    {
+        return $this->server['REMOTE_ADDR'] ?? null;
+    }
+
+    public function isJson(): bool
+    {
+        return str_contains($this->header('Content-Type', ''), 'application/json');
+    }
+
+    public function file(string $key)
+    {
+        return $this->files[$key] ?? null;
     }
 }

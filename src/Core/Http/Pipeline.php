@@ -56,12 +56,12 @@ class Pipeline
     {
         return function ($stack, $pipe) {
             return function ($passable) use ($stack, $pipe) {
+                $container = \App\Core\Container\Container::getInstance();
+
                 if (is_callable($pipe)) {
-                    // If pipe is a Closure
                     return $pipe($passable, $stack);
-                } elseif (is_string($pipe) && class_exists($pipe)) {
-                    // If pipe is a Class Name
-                    $instance = new $pipe();
+                } elseif (is_string($pipe)) {
+                    $instance = $container->get($pipe);
                     if (method_exists($instance, 'handle')) {
                         return $instance->handle($passable, $stack);
                     }
