@@ -4,6 +4,7 @@ namespace App\Core\Router;
 
 use App\Core\Http\Request;
 use App\Core\Http\Response;
+use App\Core\Container\Container;
 
 class Router
 {
@@ -151,7 +152,8 @@ class Router
                 throw new \Exception("Controller class $class not found");
             }
 
-            $controller = new $class();
+            $container = Container::getInstance();
+            $controller = $container->get($class);
             
             if (!method_exists($controller, $method)) {
                 throw new \Exception("Method $method not found in controller $class");

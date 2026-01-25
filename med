@@ -13,6 +13,7 @@ use App\Core\Console\Commands\RunServerCommand;
 use App\Core\Console\Commands\KeyGenerateCommand;
 use App\Core\Console\Commands\MakeServiceCommand;
 use App\Core\Console\Commands\MakeRepositoryCommand;
+use App\Core\Console\Commands\MakeModuleCommand;
 
 $application = new Application('Med Framework CLI', '1.0.0');
 
@@ -24,4 +25,5 @@ $application->add(new RunServerCommand());
 $application->add(new KeyGenerateCommand());
 $application->add(new MakeServiceCommand());
 $application->add(new MakeRepositoryCommand());
+$application->add(new MakeModuleCommand());
 $application->run(); 

@@ -75,6 +75,11 @@ abstract class BaseRepository implements RepositoryInterface
         return $this->where('id', $id)->first();
     }
 
+    public function unique(string $column, $value)
+    {
+        return $this->where($column, $value)->first();
+    }   
+
     public function create(array $data): string
     {
         $model = new $this->modelClass();
@@ -113,6 +118,22 @@ abstract class BaseRepository implements RepositoryInterface
         return $this->query("DELETE FROM {$this->tableName} WHERE id = :id", ['id' => $id])->rowCount() > 0;
     }
 
+
+    public function updateOrCreate(array $attributes, array $values): self
+    {
+        $model = new $this->modelClass();
+
+        if (isset($model->fillable)) {
+            $values = array_intersect_key($values, array_flip($model->fillable));
+        }
+
+        $fields = array_map(fn($key) => "$key = :$key", array_keys($values));
+        $sql = "UPDATE {$this->tableName} SET " . implode(', ', $fields) . " WHERE id = :id";
+
+        $values['id'] = $id;
+        return $this->query($sql, $values)->rowCount() > 0;
+    }
+    
     // --- Query Builder Logic ---
 
     public function where(string $column, $value, string $operator = '='): self

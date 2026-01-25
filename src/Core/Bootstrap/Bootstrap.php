@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 use App\Core\View\BladeEngine;
 use App\Infrastructure\Database;
 use App\Core\Router\Router;
+use App\Core\Container\Container;
 
 /**
  * Class Bootstrap
@@ -52,7 +53,11 @@ class Bootstrap
      */
     public static function run()
     {
-        self::boot();
+        // Initialize Container
+        $container = Container::getInstance();
+
+        // Discover and Load Modules
+        self::loadModules($container);
 
         // Locates routes in the /routes/web.php file
         $routesPath = self::$basePath . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
@@ -61,10 +66,48 @@ class Bootstrap
             require_once $routesPath;
         } else {
             // Fallback for alternative route location
-            require_once self::$basePath . '/src/Application/routes/web.php';
+            $legacyRoutes = self::$basePath . '/src/Application/routes/web.php';
+            if (file_exists($legacyRoutes)) {
+                require_once $legacyRoutes;
+            }
         }
 
         Router::resolve();
+    }
+
+    /**
+     * Auto-discover and boot modules in src/Modules
+     */
+    private static function loadModules($container): void
+    {
+        $modulesPath = self::$basePath . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Modules';
+        
+        if (!is_dir($modulesPath)) {
+            return;
+        }
+
+        $directories = scandir($modulesPath);
+
+        foreach ($directories as $directory) {
+            if ($directory === '.' || $directory === '..') {
+                continue;
+            }
+
+            $moduleDir = $modulesPath . DIRECTORY_SEPARATOR . $directory;
+            if (!is_dir($moduleDir)) {
+                continue;
+            }
+
+            $moduleClass = "App\\Modules\\$directory\\{$directory}Module";
+            
+            if (class_exists($moduleClass)) {
+                $module = new $moduleClass($moduleDir);
+                if ($module instanceof \App\Core\Module\Module) {
+                    $module->boot();
+                    $module->registerRoutes();
+                }
+            }
+        }
     }
 
     /**
