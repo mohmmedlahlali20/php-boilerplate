@@ -7,6 +7,7 @@ use App\Core\View\BladeEngine;
 use App\Infrastructure\Database;
 use App\Core\Router\Router;
 use App\Core\Container\Container;
+use App\Core\Config\Config;
 
 /**
  * Class Bootstrap
@@ -24,11 +25,10 @@ class Bootstrap
     {
         if (self::$isBooted) return;
 
-        // dirname(__DIR__, 3) returns from src/Core/Bootstrap to the project root
         self::$basePath = realpath(dirname(__DIR__, 3));
 
         // Load .env from the project root
-        $dotenv = \Dotenv\Dotenv::createImmutable(self::$basePath);
+        $dotenv = Dotenv::createImmutable(self::$basePath);
         $dotenv->load();
 
         $debug = $_ENV['APP_DEBUG'] ?? 'false';
@@ -45,34 +45,67 @@ class Bootstrap
             session_start();
         }
 
+        // Load Configuration
+        Config::load(self::$basePath . DIRECTORY_SEPARATOR . 'config');
+
         self::$isBooted = true;
     }
 
     /**
-     * Executes the application lifecycle: booting, loading routes, and resolving the request.
+     * Executes the application lifecycle.
      */
     public static function run()
     {
-        // Initialize Container
-        $container = Container::getInstance();
+        set_exception_handler([\App\Core\Exceptions\ExceptionHandler::class, 'handle']);
 
-        // Discover and Load Modules
-        self::loadModules($container);
+        try {
+            self::boot();
+            
+            // Validate environment
+            \App\Core\Bootstrap\Environment::validate();
 
-        // Locates routes in the /routes/web.php file
-        $routesPath = self::$basePath . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
+            // Initialize Container
+            $container = Container::getInstance();
 
-        if (file_exists($routesPath)) {
-            require_once $routesPath;
-        } else {
-            // Fallback for alternative route location
-            $legacyRoutes = self::$basePath . '/src/Application/routes/web.php';
-            if (file_exists($legacyRoutes)) {
-                require_once $legacyRoutes;
+            // Load Service Providers from Config
+            self::loadProviders($container);
+
+            // Discover and Load Modules
+            self::loadModules($container);
+
+            // Load Routes
+            $routesPath = self::$basePath . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
+            if (file_exists($routesPath)) {
+                require_once $routesPath;
+            }
+
+            Router::resolve();
+        } catch (\Throwable $e) {
+            \App\Core\Exceptions\ExceptionHandler::handle($e);
+        }
+    }
+
+    /**
+     * Load all service providers defined in the configuration.
+     */
+    private static function loadProviders($container): void
+    {
+        $providers = config('app.providers', []);
+        $instances = [];
+
+        foreach ($providers as $providerClass) {
+            if (class_exists($providerClass)) {
+                $provider = new $providerClass($container);
+                if ($provider instanceof \App\Core\Providers\ServiceProvider) {
+                    $provider->register();
+                    $instances[] = $provider;
+                }
             }
         }
 
-        Router::resolve();
+        foreach ($instances as $instance) {
+            $instance->boot();
+        }
     }
 
     /**
@@ -94,10 +127,6 @@ class Bootstrap
             }
 
             $moduleDir = $modulesPath . DIRECTORY_SEPARATOR . $directory;
-            if (!is_dir($moduleDir)) {
-                continue;
-            }
-
             $moduleClass = "App\\Modules\\$directory\\{$directory}Module";
             
             if (class_exists($moduleClass)) {
@@ -110,10 +139,6 @@ class Bootstrap
         }
     }
 
-    /**
-     * Initializes and returns the Blade Template Engine instance.
-     * @return BladeEngine
-     */
     public static function initView()
     {
         if (!self::$isBooted) self::boot();
@@ -124,25 +149,13 @@ class Bootstrap
         return new BladeEngine($viewsPath, $cachePath);
     }
 
-
-
-    /**
-     * Global helper for rendering views using the Bootstrap View Engine.
-     * @param string $view
-     * @param array $data
-     * @return string
-     */
-    function render(string $view, array $data = []): string
-    {
-        return \App\Core\Bootstrap\Bootstrap::initView()->render($view, $data);
-    }
-
-    /**
-     * Retrieves the singleton database connection instance.
-     * @return \PDO
-     */
     public static function initDatabase()
     {
         return Database::getInstance()->getConnection();
+    }
+    
+    public static function getBasePath(): string
+    {
+        return self::$basePath;
     }
 }

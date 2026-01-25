@@ -1,19 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Core\Container;
 
-use Exception;
+use App\Core\Exceptions\ContainerException;
 use ReflectionClass;
 use ReflectionParameter;
+use Closure;
 
 /**
  * Class Container
- * A simple PSR-11 inspired service container for dependency injection.
+ * A hardened PSR-11 inspired service container for dependency injection.
  */
 class Container
 {
     private array $instances = [];
     private array $bindings = [];
+    private array $resolving = [];
     private static ?Container $instance = null;
 
     public static function getInstance(): self
@@ -27,7 +31,7 @@ class Container
     /**
      * Bind a concrete class or closure to an abstract key.
      */
-    public function bind(string $abstract, $concrete = null, bool $shared = false)
+    public function bind(string $abstract, $concrete = null, bool $shared = false): void
     {
         if ($concrete === null) {
             $concrete = $abstract;
@@ -42,7 +46,7 @@ class Container
     /**
      * Bind a singleton instance.
      */
-    public function singleton(string $abstract, $concrete = null)
+    public function singleton(string $abstract, $concrete = null): void
     {
         $this->bind($abstract, $concrete, true);
     }
@@ -56,23 +60,29 @@ class Container
             return $this->instances[$abstract];
         }
 
-        if (!isset($this->bindings[$abstract])) {
-            return $this->resolve($abstract);
+        // Circular dependency detection
+        if (isset($this->resolving[$abstract])) {
+            throw new ContainerException("Circular dependency detected while resolving [{$abstract}].");
         }
 
-        $concrete = $this->bindings[$abstract]['concrete'];
+        $this->resolving[$abstract] = true;
 
-        if ($concrete instanceof \Closure) {
-            $object = $concrete($this);
-        } else {
-            $object = $this->resolve($concrete);
+        try {
+            if (!isset($this->bindings[$abstract])) {
+                $object = $this->resolve($abstract);
+            } else {
+                $concrete = $this->bindings[$abstract]['concrete'];
+                $object = ($concrete instanceof Closure) ? $concrete($this) : $this->resolve($concrete);
+            }
+
+            if (isset($this->bindings[$abstract]['shared']) && $this->bindings[$abstract]['shared']) {
+                $this->instances[$abstract] = $object;
+            }
+
+            return $object;
+        } finally {
+            unset($this->resolving[$abstract]);
         }
-
-        if ($this->bindings[$abstract]['shared']) {
-            $this->instances[$abstract] = $object;
-        }
-
-        return $object;
     }
 
     /**
@@ -81,19 +91,19 @@ class Container
     public function resolve(string $concrete)
     {
         if (!class_exists($concrete)) {
-            throw new Exception("Class {$concrete} does not exist.");
+            throw new ContainerException("Class [{$concrete}] does not exist.");
         }
 
         $reflector = new ReflectionClass($concrete);
 
         if (!$reflector->isInstantiable()) {
-            throw new Exception("Class {$concrete} is not instantiable.");
+            throw new ContainerException("Class [{$concrete}] is not instantiable.");
         }
 
         $constructor = $reflector->getConstructor();
 
         if (is_null($constructor)) {
-            return new $concrete;
+            return new $concrete();
         }
 
         $parameters = $constructor->getParameters();
@@ -114,7 +124,7 @@ class Container
             } elseif ($parameter->isDefaultValueAvailable()) {
                 $dependencies[] = $parameter->getDefaultValue();
             } else {
-                throw new Exception("Cannot resolve dependency {$parameter->name}");
+                throw new ContainerException("Cannot resolve parameter [{$parameter->name}] in [{$parameter->getDeclaringClass()->getName()}].");
             }
         }
 
