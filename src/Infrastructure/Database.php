@@ -1,47 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure;
 
 use PDO;
 use PDOException;
-use Dotenv\Dotenv;
+use App\Core\Exceptions\FrameworkException;
 
 /**
  * Class Database
- * Manages the database connection using the Singleton Pattern to ensure 
- * only one PDO instance exists throughout the application lifecycle.
+ * Refactored to use the centralized Config system for connection parameters.
  */
-class Database {
-    /** @var Database|null The single instance of this class */
-    private static $instance = null;
+class Database 
+{
+    private static ?Database $instance = null;
+    private PDO $connection;
 
-    /** @var PDO The active PDO connection */
-    private $connection;
+    private function __construct() 
+    {
+        $config = config('database.connections.' . config('database.default', 'mysql'));
+        
+        if (!$config) {
+            throw new FrameworkException("Database configuration not found for the default connection.");
+        }
 
-    /**
-     * Private constructor to prevent direct instantiation.
-     * Initializes environment variables and establishes the PDO connection based on driver.
-     * @throws PDOException If the connection attempt fails.
-     */
-    private function __construct() {
-        // Loading environment variables from the project root
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
+        $driver = config('database.default', 'mysql');
+        $host   = $config['host'] ?? '127.0.0.1';
+        $db     = $config['database'] ?? '';
+        $user   = $config['username'] ?? 'root';
+        $pass   = $config['password'] ?? '';
+        $port   = $config['port'] ?? '3306';
 
-        $driver = $_ENV['DATABASE']; 
-        $host   = $_ENV['DB_HOST'];
-        $db     = $_ENV['DB_NAME'];
-        $user   = $_ENV['DB_USER'];
-        $pass   = $_ENV['DB_PASS'];
-        $port   = $_ENV['DB_PORT'];
-
-        // Select DSN based on the chosen driver
         switch ($driver) {
-            case 'pgsql':
-                $dsn = "pgsql:host=$host;port=$port;dbname=$db";
-                break;
             case 'sqlite':
-                $dsn = "sqlite:" . __DIR__ . "/../../storage/database.sqlite";
+                $dsn = "sqlite:" . \App\Core\Bootstrap\Bootstrap::getBasePath() . "/storage/database.sqlite";
                 break;
             case 'mysql':
             default:
@@ -56,42 +49,29 @@ class Database {
         ];
 
         try {
-            // Establish connection (User and Pass are ignored by SQLite)
             $this->connection = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $e) {
-            throw new PDOException($e->getMessage(), (int)$e->getCode());
+            throw new FrameworkException("Database Connection Failed: " . $e->getMessage(), (int)$e->getCode(), $e);
         }
     }
 
-    /**
-     * Retrieves the single instance of the Database class.
-     * @return Database
-     */
-    public static function getInstance(): self {
+    public static function getInstance(): self 
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
 
-    /**
-     * Returns the PDO connection instance.
-     * @return PDO
-     */
-    public function getConnection(): PDO {
+    public function getConnection(): PDO 
+    {
         return $this->connection;
     }
 
-    /**
-     * Prevent cloning of the singleton instance.
-     */
     private function __clone() {}
 
-    /**
-     * Prevent unserialization of the singleton instance.
-     * @throws \Exception
-     */
-    public function __wakeup() {
-        throw new \Exception("Cannot unserialize a singleton.");
+    public function __wakeup() 
+    {
+        throw new FrameworkException("Cannot unserialize a singleton.");
     }
 }
