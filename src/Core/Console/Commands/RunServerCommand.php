@@ -20,7 +20,7 @@ class RunServerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln("<info>Med Framework server starting on http://localhost:8000</info>");
+        $output->writeln("<info>Demon Framework server starting on http://localhost:8000</info>");
         $output->writeln("<comment>Press Ctrl+C to stop the server</comment>");
 
         // Execute the built-in PHP server pointing to the public directory

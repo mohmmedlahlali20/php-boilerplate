@@ -1,80 +1,80 @@
-# 🚀 Med PHP Framework
+# 👹 Demon Framework Core V6.6.6
 
-A lightweight, high-performance PHP MVC framework designed for rapid development. This boilerplate provides a robust core with a built-in CLI for scaffolding, a powerful Blade-like template engine, and a clean directory structure with Zero Dependencies.
+![Demon Framework Hero](https://i.imgur.com/your-image-here.png)
 
----
+> **"Speed is not a feature; it is an absolute mandate."**
 
-## 🛠 Features
-
-* **Built-in CLI (`med`)**: Scaffold controllers, models, and entire modules instantly.
-* **Modular Architecture**: Build scalable apps by isolating features (e.g., E-commerce, Blog) into independent modules.
-* **MVC & Core Patterns**: Clear separation of concerns with Service Container and Dependency Injection.
-* **Blade-like Engine**: Native support for `@extends`, `@section`, and custom `@CSRF` directives.
-* **Modern Routing**: Regex-based routing with parameter support `user/{id}`.
-* **Middleware Pipeline**: robust request filtering with global and route-specific middleware.
-* **Security**: Built-in CSRF protection and Session management.
-* **Dependency Injection**: PSR-11 inspired container for managing application services.
+The **Demon Framework** is a high-performance, ultra-premium PHP MVC engine designed for developers who demand absolute dominance. Engineered with an obsidian core, tactical 3D rendering, and a ruthless attention to millisecond optimization, it provides a "50-engineer" scale infrastructure for modern, decentralized web applications.
 
 ---
 
-## 📂 Project Structure
+## 🛠 Advanced Armory
 
-* **`src/Modules/`**: Independent, self-contained features (Controllers, Routes, Models).
-* **`src/Application/`**: Global Controllers, Routes, and Middleware.
-* **`src/Domain/`**: Business logic and Global Models (Entities).
-* **`src/Infrastructure/`**: Database connections and low-level implementations.
-* **`src/Core/`**: The framework's engine (Router, Bootstrap, Container).
-* **`public/`**: Web entry point (`index.php`) and assets.
-* **`views/`**: Global template files (`.med.php`).
+*   **Obsidian Core**: A locked-down, high-performance container for manageing souls (services).
+*   **Demon CLI**: An infernal binary tool for forging modules, controllers, and database migrations instantly.
+*   **Master Grimoire**: Exhaustive, tactical documentation built directly into the core engine.
+*   **Nether ORM**: A blazing fast Active Record implementation with chainable **Necrotic Caching**.
+*   **Soul Events**: A global Event Dispatcher for building decoupled, horizontally scalable logic.
+*   **3D Visual Engine**: Native Three.js & GSAP integration for high-end, kinetic user experiences.
+*   **Hardened Containment**: Built-in CSRF/XSS protection and tactical middleware layers.
 
 ---
 
-## 🚀 Getting Started
+## 📂 Anatomical Structure
 
-### 1. Installation
-
-Create a new project using Composer:
-
-```bash
-composer create-project mohammed/php-boilerplate:dev-main my-app
-cd my-app
+```text
+├── src/
+│   ├── Application/    # Domain-specific logic (Routes, Controllers)
+│   ├── Core/           # The Framework Engine (The Obsidian Heart)
+│   └── Infrastructure/ # Database pacts and low-level implementations
+├── views/              # .demon.php template manifestations
+├── public/             # The only portal to the mortal world
+└── storage/            # Cache, Souls, and Application state
 ```
 
-### 2. Environment Setup
+---
 
-Copy the example environment file and configure your database settings:
+## 🚀 Primal Ignition
 
+### 1. Summon the Repo
+```bash
+git clone https://github.com/mohmmedlahlali20/php-boilerplate.git
+composer install
+```
+
+### 2. Sign the Environment Pact
 ```bash
 cp .env.example .env
-# Edit .env with your database credentials
+php demon key:generate
 ```
 
-### 3. Run Server
-
+### 3. Manifest the Matrix
 ```bash
-php med serve
-# Or manually: php -S localhost:8000 -t public
+php demon run:server
 ```
+Visit `http://localhost:8000` to witness the manifestation.
 
-### 💻 CLI Commands
+---
 
-The framework comes with a powerful CLI tool:
+## 💻 Elite CLI Commands
 
-| Command | Description |
-|---------|-------------|
-| `php med key:generate` | Generate the application security key |
-| `php med make:module Shop` | Creates a new self-contained module |
-| `php med make:controller User` | Creates `UserController.php` |
-| `php med make:model User` | Creates `User.php` Domain Model |
-| `php med make:service User` | Creates `UserService.php` |
-| `php med make:repository User` | Creates `UserRepository.php` |
-| `php med make:migration create_users_table` | Creates a new migration file |
-| `php med migrate` | Runs pending migrations |
-| `php med serve` | Start the development server |
-` |
-| `php med make:model User` | Creates `User.php` Domain Model |
-| `php med make:service User` | Creates `UserService.php` |
-| `php med make:repository User` | Creates `UserRepository.php` |
-| `php med make:migration create_users_table` | Creates a new migration file |
-| `php med migrate` | Runs pending migrations |
-| `php med serve` | Start the development server |
+| Intent | Command |
+| :--- | :--- |
+| **Ignite Engine** | `php demon run:server` |
+| **Forge Soul (Controller)** | `php demon make:controller [Name]` |
+| **Forge Vessel (Model)** | `php demon make:model [Name]` |
+| **Evolve World (Migrate)** | `php demon migrate` |
+| **Sacrifice Cache** | `storage/framework/cache clear` (Manual) |
+| **Inspect Soul** | Use `dd($var)` in code |
+
+---
+
+## 📖 The Master Grimoire
+
+For exhaustive technical documentation, visit the internal portal:
+**`http://localhost:8000/docs`**
+
+---
+
+## ⚖️ License
+Licensed under the Abyssal Engineering Org - Authorized Use Only. Built with Blood.

@@ -13,16 +13,25 @@ class QueryBuilder
     protected ?int $limit = null;
     protected array $orderBy = [];
 
+    protected ?int $cacheTtl = null;
+
     public function __construct(string $table, string $modelClass)
     {
         $this->table = $table;
         $this->modelClass = $modelClass;
     }
 
+    public function remember(int $seconds): self
+    {
+        $this->cacheTtl = $seconds;
+        return $this;
+    }
+
     public function where(string $column, $value, string $operator = '='): self
     {
-        $this->wheres[] = "$column $operator :$column";
-        $this->params[$column] = $value;
+        $placeholder = str_replace('.', '_', $column) . '_' . count($this->params);
+        $this->wheres[] = "$column $operator :$placeholder";
+        $this->params[$placeholder] = $value;
         return $this;
     }
 
@@ -54,10 +63,21 @@ class QueryBuilder
             $sql .= " LIMIT {$this->limit}";
         }
 
-        $db = Model::getConnection(); // I'll need to add a getter for the connection
+        if ($this->cacheTtl !== null) {
+            $cacheKey = 'query_' . md5($sql . serialize($this->params));
+            if ($cached = \App\Core\Support\Cache::get($cacheKey)) {
+                return array_map(fn($data) => new $this->modelClass($data), $cached);
+            }
+        }
+
+        $db = DatabaseManager::getInstance()->getConnection();
         $stmt = $db->prepare($sql);
         $stmt->execute($this->params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($this->cacheTtl !== null) {
+            \App\Core\Support\Cache::set($cacheKey, $results, $this->cacheTtl);
+        }
 
         return array_map(fn($row) => new $this->modelClass($row), $results);
     }

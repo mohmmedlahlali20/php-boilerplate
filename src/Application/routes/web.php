@@ -4,7 +4,7 @@ use App\Core\Router\Router;
 use App\Application\Controllers\SecurityTestController;
 
 Router::get('/', function() {
-    return render('home', ['title' => 'Welcome to Med Framework']);
+    return render('home', ['title' => 'Welcome to Demon Framework']);
 });
 
 Router::get('/docs', function() {
@@ -13,6 +13,10 @@ Router::get('/docs', function() {
 
 Router::get('/showcase', function() {
     return render('showcase', ['title' => 'UI Showcase']);
+});
+
+Router::get('/demon', function() {
+    return render('demon', ['title' => 'Demon Framework | Devilish Speed']);
 });
 
 // --- Security Lab Routes ---
