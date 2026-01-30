@@ -34,6 +34,16 @@ class AppServiceProvider extends ServiceProvider
         $this->container->singleton(Router::class, function() {
             return new Router();
         });
+
+        // Bind the Cache
+        $this->container->singleton(\App\Core\Support\Cache::class, function() {
+            return new \App\Core\Support\Cache();
+        });
+
+        // Bind the Event
+        $this->container->singleton(\App\Core\Support\Event::class, function() {
+            return new \App\Core\Support\Event();
+        });
     }
 
     public function boot(): void

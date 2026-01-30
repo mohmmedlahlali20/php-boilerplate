@@ -48,6 +48,9 @@ class Bootstrap
         // Load Configuration
         Config::load(self::$basePath . DIRECTORY_SEPARATOR . 'config');
 
+        // Initialize Cache
+        \App\Core\Support\Cache::init(self::$basePath . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'cache');
+
         self::$isBooted = true;
     }
 

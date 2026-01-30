@@ -93,21 +93,33 @@ if (!function_exists('dd')) {
      */
     function dd(...$vars): void
     {
-        echo '<div style="background-color: #1a1a1a; color: #ececec; padding: 25px; border-radius: 10px; font-family: \'Fira Code\', monospace; line-height: 1.6; margin: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">';
-        echo '<div style="display: flex; align-items: center; margin-bottom: 15px;">';
-        echo '<span style="background: #ff2d20; color: white; padding: 4px 10px; border-radius: 4px; font-weight: bold; margin-right: 10px;">DEBUG</span>';
-        echo '<small style="color: #666;">die dump Debugger</small>';
+        if (!headers_sent()) {
+            header('Content-Type: text/html; charset=utf-8');
+        }
+
+        echo '<style>
+            .dd-container { background: #050505; color: #d1d5db; padding: 40px; font-family: "JetBrains Mono", monospace; min-height: 100vh; }
+            .dd-tag { background: #FF003C; color: white; padding: 5px 15px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; font-size: 10px; margin-bottom: 20px; display: inline-block; }
+            .dd-header { border-bottom: 1px solid rgba(255, 0, 60, 0.2); margin-bottom: 30px; padding-bottom: 20px; }
+            .dd-box { background: #111; border: 1px solid rgba(255, 0, 60, 0.1); padding: 25px; border-radius: 4px; border-left: 4px solid #FF003C; margin-bottom: 20px; overflow-x: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+            pre { margin: 0; color: #ff6e91; }
+        </style>';
+
+        echo '<div class="dd-container">';
+        echo '<div class="dd-header">';
+        echo '<span class="dd-tag">Soul Inspection</span>';
+        echo '<div style="color: #4b5563; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;">Demon Core Engine V6.6.6</div>';
         echo '</div>';
 
         foreach ($vars as $var) {
-            echo '<pre style="background: #000; padding: 15px; border-radius: 6px; overflow-x: auto; color: #4ade80; border: 1px solid #222; margin-bottom: 10px;">';
-            // Using htmlspecialchars to prevent rendering HTML tags inside the dump
+            echo '<div class="dd-box"><pre>';
             ob_start();
             var_dump($var);
             echo htmlspecialchars(ob_get_clean());
-            echo '</pre>';
+            echo '</pre></div>';
         }
 
+        echo '<div style="margin-top: 50px; color: #222; font-size: 8px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5em;">End of Manifestation</div>';
         echo '</div>';
         die();
     }

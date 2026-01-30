@@ -30,7 +30,7 @@ class BladeEngine implements TemplateEngineInterface
     public function render(string $view, array $data = []): string
     {
         $viewClean = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $view);
-        $viewPath = $this->viewsPath . DIRECTORY_SEPARATOR . $viewClean . '.med.php';
+        $viewPath = $this->viewsPath . DIRECTORY_SEPARATOR . $viewClean . '.demon.php';
         $cacheFile = $this->cachePath . DIRECTORY_SEPARATOR . md5($view) . '.php';
 
         if (!file_exists($viewPath)) {
@@ -85,7 +85,7 @@ class BladeEngine implements TemplateEngineInterface
                         \$view = '{$view}';
                         \$viewPath = \$this->viewsPath . DIRECTORY_SEPARATOR .
                             strtr(\$view, ['/' => DIRECTORY_SEPARATOR, '\\\\' => DIRECTORY_SEPARATOR]) .
-                            '.med.php';
+                            '.demon.php';
 
                         if (file_exists(\$viewPath)) {
                             \$cacheFile = \$this->cachePath . DIRECTORY_SEPARATOR . md5(\$viewPath) . '.php';
