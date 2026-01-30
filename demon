@@ -15,7 +15,7 @@ use App\Core\Console\Commands\MakeServiceCommand;
 use App\Core\Console\Commands\MakeRepositoryCommand;
 use App\Core\Console\Commands\MakeModuleCommand;
 
-$application = new Application('Med Framework CLI', '1.0.0');
+$application = new Application('Demon Framework CLI', '6.6.6');
 
 $application->add(new MakeControllerCommand());
 $application->add(new MakeModelCommand());
