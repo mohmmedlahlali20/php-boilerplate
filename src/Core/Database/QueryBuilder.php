@@ -37,12 +37,18 @@ class QueryBuilder
 
     public function limit(int $limit): self
     {
-        $this->limit = $limit;
+        $this->limit = (int) $limit;
         return $this;
     }
 
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
+        // Sanitize column: allow alphanumeric, underscores, and dots
+        $column = preg_replace('/[^a-zA-Z0-9_.]/', '', $column);
+        
+        // Strict validation for direction
+        $direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+        
         $this->orderBy[] = "$column $direction";
         return $this;
     }

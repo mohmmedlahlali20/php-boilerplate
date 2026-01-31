@@ -22,8 +22,9 @@ Router::get('/demon', function() {
 // --- Security Lab Routes ---
 Router::get('/security-test', [SecurityTestController::class, 'index']);
 
-// Unsafe Route: No middleware attached
-Router::post('/security-test/unsafe', [SecurityTestController::class, 'handleUnsafe']);
+// Safe Route: Added CSRF middleware
+Router::post('/security-test/unsafe', [SecurityTestController::class, 'handleUnsafe'])
+    ->middleware('csrf');
 
 // Safe Route: Protected by CSRF middleware
 Router::post('/security-test/safe', [SecurityTestController::class, 'handleSafe']);
